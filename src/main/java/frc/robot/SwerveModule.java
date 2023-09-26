@@ -4,6 +4,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.lib.math.Conversions;
 import frc.lib.util.CTREModuleState;
 import frc.lib.util.SwerveModuleConstants;
@@ -47,11 +48,16 @@ public class SwerveModule {
         configDriveMotor();
 
         lastAngle = getState().angle;
+
+        // mAngleMotor.setRotorPosition(0);
+        angleEncoder.setPosition(getCanCoderRaw());
+        resetToAbsolute();
     }
 
     public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop){
         /* This is a custom optimize function, since default WPILib optimize assumes continuous controller which CTRE and Rev onboard is not */
-        desiredState = CTREModuleState.optimize(desiredState, getState().angle); 
+        desiredState = CTREModuleState.optimize(desiredState, getCanCoder()); 
+        // SwerveModuleState.optimize(desiredState, getCanCoder());
         setAngle(desiredState);
         setSpeed(desiredState, isOpenLoop);
     }
@@ -70,7 +76,11 @@ public class SwerveModule {
     private void setAngle(SwerveModuleState desiredState){
         Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (DrivetrainConstants.MAX_SPEED * 0.01)) ? lastAngle : desiredState.angle; //Prevent rotating module if speed is less then 1%. Prevents Jittering.
         
-        mAngleMotor.setControl(new PositionDutyCycle((angle.getDegrees() / 360) / DrivetrainConstants.ANGLE_RATIO));
+        // mAngleMotor.setControl(new PositionDutyCycle((angle.getDegrees() / 360) * DrivetrainConstants.ANGLE_RATIO));
+        // mAngleMotor.setControl(new PositionDutyCycle((0)));
+        mAngleMotor.setControl(new PositionDutyCycle(angle.getRotations()));
+
+
         lastAngle = angle;
     }
 
@@ -79,22 +89,34 @@ public class SwerveModule {
     }
 
     public Rotation2d getCanCoder(){
-        return Rotation2d.fromRotations(angleEncoder.getAbsolutePosition().getValue());
+        return Rotation2d.fromRotations((angleEncoder.getAbsolutePosition().getValue()));//= - angleOffset.getRotations()));
+    }
+
+    public double getCanCoderRaw(){
+        return angleEncoder.getAbsolutePosition().getValue();// - angleOffset.getRotations();
+    }
+
+    public double getAngleRaw(){
+        return mAngleMotor.getRotorPosition().getValue();
     }
 
     public void resetToAbsolute(){
-        double absolutePosition = ((getCanCoder().getDegrees() - angleOffset.getDegrees()) * DrivetrainConstants.ANGLE_RATIO)/360;
+        double absolutePosition = getCanCoder().getRotations() * DrivetrainConstants.ANGLE_RATIO;
         mAngleMotor.setRotorPosition(absolutePosition);
     }
 
     private void configAngleEncoder(){        
         angleEncoder.getConfigurator().apply(new CANcoderConfiguration());
-        angleEncoder.getConfigurator().apply(new CTREConfigs().swerveCanCoderConfig);
+        CANcoderConfiguration config = new CTREConfigs().swerveCanCoderConfig;
+        config.MagnetSensor.MagnetOffset = -angleOffset.getRotations();
+        angleEncoder.getConfigurator().apply(config);
     }
 
     private void configAngleMotor(){
         mAngleMotor.getConfigurator().apply(new TalonFXConfiguration());
-        mAngleMotor.getConfigurator().apply(new CTREConfigs().swerveAngleFXConfig);
+        TalonFXConfiguration config = new CTREConfigs().swerveAngleFXConfig;
+        config.Feedback.FeedbackRemoteSensorID = angleEncoder.getDeviceID();
+        mAngleMotor.getConfigurator().apply(config);
         resetToAbsolute();
     }
 

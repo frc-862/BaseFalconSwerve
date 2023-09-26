@@ -1,28 +1,15 @@
 package frc.robot;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
 
 
 public final class Constants {
-    // Path to the Blackout directory
-    public static final Path BLACKOUT_PATH = Paths.get("home/lvuser/blackout");
-    
-    // Check if we're on Blackout
-    public static final boolean isBlackout() {
-        return BLACKOUT_PATH.toFile().exists();
-    }
-
-    public static final boolean isGridlock() {
-        return !isBlackout();
-    }
 
     public static final class ControllerConstants {
         // Ports for the controllers
@@ -36,11 +23,10 @@ public final class Constants {
     }
 
     public static final class DrivetrainConstants {
-        public static final double FRAME_PERIMETER = 26;
 
         // Our drivetrain track width and Wheelbase
-        public static final double DRIVETRAIN_TRACKWIDTH_METERS = Units.inchesToMeters(FRAME_PERIMETER-5.1875);
-        public static final double DRIVETRAIN_WHEELBASE_METERS = Units.inchesToMeters(FRAME_PERIMETER-5.1875);
+        public static final double DRIVETRAIN_TRACKWIDTH_METERS = Units.inchesToMeters(22.5);
+        public static final double DRIVETRAIN_WHEELBASE_METERS =  Units.inchesToMeters(22.5);
 
         public static final double DRIVE_SUPPLY_LIMIT = 40d;
         public static final double DRIVE_SUPPLY_THRESHOLD = 60d;
@@ -53,12 +39,12 @@ public final class Constants {
         public static final double DRIVE_OPEN_RAMP_RATE = 0.25;
         public static final double DRIVE_CLOSED_RAMP_RATE = 0.0;
 
-        public static final double MAX_SPEED = Units.feetToMeters(16.3);
+        public static final double MAX_SPEED = Units.feetToMeters(16.2);
         public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_SPEED / Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
         public static final double GEAR_RATIO = 6.12;
         public static final double WHEEL_DIAMETER = Units.inchesToMeters(4d);
         public static final double WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_DIAMETER;
-        public static final double ANGLE_RATIO = ((150.0 / 7.0) / 1.0);
+        public static final double ANGLE_RATIO = 12.8;
 
         public static final InvertedValue ANGLE_INVERT = InvertedValue.Clockwise_Positive;
         public static final InvertedValue DRIVE_INVERT = InvertedValue.Clockwise_Positive;
@@ -66,25 +52,33 @@ public final class Constants {
         public static final NeutralModeValue ANGLE_NEUTRAL = NeutralModeValue.Brake;
         public static final NeutralModeValue DRIVE_NEUTRAL = NeutralModeValue.Brake;
 
+        // i swapped the left and right negations here in order to fix an issue with turn motors being oriented like an X instead of a diamond. There is likely some underlying cause that should be addressed, perhaps something to do with sensor inverts, or some other novel phoenix 6 thing
+        // i do remember noticing similar behavior when using phoenix 6 on HaD, so that does point me to it being the underlying cause
         public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(
-            new Translation2d(DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
-            new Translation2d(DRIVETRAIN_WHEELBASE_METERS / 2.0, -DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
             new Translation2d(-DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
-            new Translation2d(-DRIVETRAIN_WHEELBASE_METERS / 2.0, -DRIVETRAIN_TRACKWIDTH_METERS / 2.0)
+            new Translation2d(DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
+            new Translation2d(-DRIVETRAIN_WHEELBASE_METERS / 2.0, -DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
+            new Translation2d(DRIVETRAIN_WHEELBASE_METERS / 2.0, -DRIVETRAIN_TRACKWIDTH_METERS / 2.0)
         );
 
+        public static final Rotation2d FRONT_LEFT_RESTING_ANGLE = Rotation2d.fromDegrees(-45d);
+        public static final Rotation2d FRONT_RIGHT_RESTING_ANGLE = Rotation2d.fromDegrees(45d);
+        public static final Rotation2d BACK_LEFT_RESTING_ANGLE = Rotation2d.fromDegrees(45d);
+        public static final Rotation2d BACK_RIGHT_RESTING_ANGLE = Rotation2d.fromDegrees(-45d);
+
+        // very BS tuning (no matter how well it works :P)
         public static final class AzimuthGains {
-            public static final double kP = 0.2;
-            public static final double kI = 0d;
-            public static final double kD = 0.1d;
-            public static final double kS = 0d;
+            public static final double kP = 2.816;//22
+            public static final double kI = 0.0;//22d;
+            public static final double kD = 0.0;//0005d;
+            public static final double kS = 3;//54d;
         }
 
         // Gains vaules for PIDControllers
         public static final class DriveGains {
-            public static final double kP = 0.15;// .116d;
-            public static final double kI = 0d;
-            public static final double kD = 0d;
+            public static final double kP = 0.22;// .116d;
+            public static final double kI = 0.22d;
+            public static final double kD = 0.001d;
 
             public static final double kS = 0.225;// 229d;
             public static final double kV = 0d;
@@ -93,21 +87,11 @@ public final class Constants {
 
         // Steer offsets for our modules
         public static final class Offsets {
-            // Gridlocks swerve module absolute encoder offsets
-            public static final class Gridlock {
-                public static final double FRONT_LEFT_STEER_OFFSET = -Math.toRadians(193.535);
-                public static final double FRONT_RIGHT_STEER_OFFSET = -Math.toRadians(145.547);
-                public static final double BACK_LEFT_STEER_OFFSET = -Math.toRadians(199.688);
-                public static final double BACK_RIGHT_STEER_OFFSET = -Math.toRadians(210.938);
-            }
-
-            // Blackouts swerve module absolute encoder offsets
-            public static final class Blackout {
-                public static final double FRONT_LEFT_STEER_OFFSET = -Math.toRadians(253.916);
-                public static final double FRONT_RIGHT_STEER_OFFSET = -Math.toRadians(222.451);
-                public static final double BACK_LEFT_STEER_OFFSET = -Math.toRadians(19.688);
-                public static final double BACK_RIGHT_STEER_OFFSET = -Math.toRadians(63.018);
-            }
+            // swerve module absolute encoder offsets
+                public static final double FRONT_LEFT_STEER_OFFSET  = 0.250977;
+                public static final double FRONT_RIGHT_STEER_OFFSET = 0.462158;
+                public static final double BACK_LEFT_STEER_OFFSET   = 0.293457;
+                public static final double BACK_RIGHT_STEER_OFFSET  = 0.340820;
         }
     }
 
@@ -121,31 +105,31 @@ public final class Constants {
             public static final int PDH = 21;
 
             // Front left CanIDs
-            public static final int FRONT_LEFT_DRIVE_MOTOR = 1;
-            public static final int FRONT_LEFT_AZIMUTH_MOTOR = 2;
-            public static final int FRONT_LEFT_CANCODER = 31;
+            public static final int FRONT_LEFT_DRIVE_MOTOR = 8;
+            public static final int FRONT_LEFT_AZIMUTH_MOTOR = 7;
+            public static final int FRONT_LEFT_CANCODER = 16;
             // Front right CanIDs
-            public static final int FRONT_RIGHT_DRIVE_MOTOR = 3;
-            public static final int FRONT_RIGHT_AZIMUTH_MOTOR = 4;
-            public static final int FRONT_RIGHT_CANCODER = 32;
+            public static final int FRONT_RIGHT_DRIVE_MOTOR = 11;
+            public static final int FRONT_RIGHT_AZIMUTH_MOTOR = 12;
+            public static final int FRONT_RIGHT_CANCODER = 17;
             // Back right CanIDs
-            public static final int BACK_RIGHT_DRIVE_MOTOR = 5;
-            public static final int BACK_RIGHT_AZIMUTH_MOTOR = 6;
-            public static final int BACK_RIGHT_CANCODER = 33;
+            public static final int BACK_RIGHT_DRIVE_MOTOR = 13;
+            public static final int BACK_RIGHT_AZIMUTH_MOTOR = 14;
+            public static final int BACK_RIGHT_CANCODER = 18;
             // Back left CanIDs
-            public static final int BACK_LEFT_DRIVE_MOTOR = 7;
-            public static final int BACK_LEFT_AZIMUTH_MOTOR = 8;
-            public static final int BACK_LEFT_CANCODER = 34;
+            public static final int BACK_LEFT_DRIVE_MOTOR = 10;
+            public static final int BACK_LEFT_AZIMUTH_MOTOR = 9;
+            public static final int BACK_LEFT_CANCODER = 15;
         }
 
         public static final class BUS {
-            public final static String PIGEON = "canivore";
+            public final static String PIGEON = "Canivore";
 
-            public final static String DRIVE = "canivore";
+            public final static String DRIVE = "Canivore";
 
-            public final static String AZIMUTH = "canivore";
+            public final static String AZIMUTH = "Canivore";
 
-            public final static String CANCODER = "canivore";
+            public final static String CANCODER = "Canivore";
         }
     }
 }

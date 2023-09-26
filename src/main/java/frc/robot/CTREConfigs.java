@@ -2,6 +2,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import frc.robot.Constants.DrivetrainConstants;
@@ -33,6 +34,11 @@ public final class CTREConfigs {
         swerveAngleFXConfig.Slot0.kD = DrivetrainConstants.AzimuthGains.kD;
         swerveAngleFXConfig.Slot0.kS = DrivetrainConstants.AzimuthGains.kS;
 
+        swerveAngleFXConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+        swerveAngleFXConfig.Feedback.SensorToMechanismRatio = 1;
+        swerveAngleFXConfig.Feedback.RotorToSensorRatio = DrivetrainConstants.ANGLE_RATIO;
+        swerveAngleFXConfig.ClosedLoopGeneral.ContinuousWrap = true;
+
 
         //Drive Config
         swerveDriveFXConfig.MotorOutput.Inverted = DrivetrainConstants.DRIVE_INVERT;
@@ -59,7 +65,8 @@ public final class CTREConfigs {
         
 
         /* Swerve CANCoder Configuration */
-        swerveCanCoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
+        swerveCanCoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
         swerveCanCoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
+
     }
 }
