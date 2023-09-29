@@ -3,6 +3,8 @@ package frc.robot.subsystems;
 import frc.robot.SwerveModule;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Constants.RobotMap;
+import frc.lib.util.Limelight;
+import frc.lib.util.Pose4d;
 import frc.lib.util.SwerveModuleConstants;
 import frc.robot.Constants.DrivetrainConstants.Offsets;
 
@@ -169,7 +171,9 @@ public class Swerve extends SubsystemBase {
 
     @Override
     public void periodic(){
-        poseEstimator.update(getYaw(), getModulePositions());  
+        poseEstimator.update(getYaw(), getModulePositions());
+        Pose4d pose = new Limelight("limelight").getBotPose();
+        poseEstimator.addVisionMeasurement(pose.toPose2d(), Timer.getFPGATimestamp() - (pose.getLatency()/1000));
 
         for(SwerveModule mod : mSwerveMods){
             // SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
