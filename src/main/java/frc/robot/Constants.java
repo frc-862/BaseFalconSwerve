@@ -95,6 +95,11 @@ public final class Constants {
         }
     }
 
+    public static final class VisionConstants {
+        //This is a magic number from gridlock, may need to be changed or removed entirely
+        public static final double PROCESS_LATENCY = 0.0472;
+    }
+
     // RobotMap Constants
     public static final class RobotMap {
         // CAN IDs
