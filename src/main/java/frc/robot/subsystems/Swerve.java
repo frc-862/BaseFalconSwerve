@@ -175,7 +175,7 @@ public class Swerve extends SubsystemBase {
      * @return true if we trust the vision data, false if we don't
      */
     public boolean trustVision() {
-        return pose != null;
+        return (pose != null) && (new Limelight("limelight").hasTarget());
     }
 
     @Override
