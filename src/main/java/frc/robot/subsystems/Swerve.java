@@ -24,12 +24,15 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Swerve extends SubsystemBase {
     public SwerveModule[] mSwerveMods;
     public SwerveDrivePoseEstimator poseEstimator;
+    private Pose4d pose;
+    private Field2d field;
     // public Pigeon2 gyro;
 
     public AHRS gyro;// = new AHRS(SPI.Port.kMXP);
@@ -89,6 +92,7 @@ public class Swerve extends SubsystemBase {
         // resetModulesToAbsolute();
 
         this.poseEstimator = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), getPose(), null, null);
+        this.field = new Field2d();
     }
 
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
@@ -172,8 +176,12 @@ public class Swerve extends SubsystemBase {
     @Override
     public void periodic(){
         poseEstimator.update(getYaw(), getModulePositions());
-        Pose4d pose = new Limelight("limelight").getBotPose();
+        pose = new Limelight("limelight").getBotPose();
         poseEstimator.addVisionMeasurement(pose.toPose2d(), Timer.getFPGATimestamp() - (pose.getLatency()/1000));
+
+        field.setRobotPose(getPose());
+
+        SmartDashboard.putData("field", field);
 
         for(SwerveModule mod : mSwerveMods){
             // SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
