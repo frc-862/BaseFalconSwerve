@@ -239,41 +239,18 @@ public class Limelight {
     }
 
     /**
-     * Robot transform in field-space
-     * @return Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw), total latency (cl+tl)
-     */
-    public Pose4d getBotPose() {
-        return toPose4d(getArrayNT("botpose"));
-    }
-
-    /**
      * Automatically return either the blue or red alliance pose
      * @see Limelight#getBotPoseBlue()
      * @see Limelight#getBotPoseRed()
+     * Robot transform is in field-space (alliance color driverstation WPILIB origin)
      * @return Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw), total latency (cl+tl)
      */
     public Pose4d getAlliancePose() {
         if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
-            return getBotPoseBlue();
+            return toPose4d(getArrayNT("botpose_wpiblue"));
         } else {
-            return getBotPoseRed();
+            return toPose4d(getArrayNT("botpose_wpired"));
         }
-    }
-
-    /**
-     * Robot transform in field-space (blue driverstation WPILIB origin)
-     * @return Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw), total latency (cl+tl)
-     */
-    public Pose4d getBotPoseBlue() {
-        return toPose4d(getArrayNT("botpose_wpiblue"));
-    }
-
-    /**
-     * Robot transform in field-space (red driverstation WPILIB origin)
-     * @return Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw), total latency (cl+tl)
-     */
-    public Pose4d getBotPoseRed() {
-        return toPose4d(getArrayNT("botpose_wpired"));
     }
 
 
