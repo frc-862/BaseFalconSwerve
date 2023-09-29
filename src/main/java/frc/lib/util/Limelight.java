@@ -4,8 +4,14 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -36,6 +42,10 @@ public class Limelight {
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Invalid IP");
         }
+    }
+
+    public String toString() {
+        return "Limelight: " + name + " at " + ip;
     }
 
     /**
@@ -285,7 +295,7 @@ public class Limelight {
     /**
      * @return ID of the primary in-view apriltag
      */
-    public int getAprilTagID() {
+    public int getApriltagID() {
         return getIntNT("tid");
     }
 
@@ -406,84 +416,90 @@ public class Limelight {
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Invalid Suffix");
         }
+    }
 
+    /**
+     * send a GET request to the limelight with the specified suffix
+     * @param suffix the suffix to add to the base url (eg "deletesnapshots", "capturesnapshot")
+     * @return the response message from the limelight
+     */
+    private String getRequest(String suffix, ArrayList<Pair<String, String>> headers) {
+        URL url = generateURL(suffix);
+        try {
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            int responseCode = connection.getResponseCode();
+            for (Pair<String, String> header : headers) {
+                connection.setRequestProperty(header.getFirst(), header.getSecond());
+            }
+            if (responseCode != 200) {
+                System.err.println("Bad LL Request: " + responseCode + " " + connection.getResponseMessage());
+            }
+            return connection.getResponseMessage();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("I'm on Crack");
+        }
+    }
+
+    private String getRequest(String suffix) {
+        return getRequest(suffix, new ArrayList<Pair<String, String>>());
+    }
+
+    private String asyncString(Supplier<Object> supplier) {
+        try {
+            return (String) CompletableFuture.supplyAsync(supplier).get();
+        } catch (InterruptedException | ExecutionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    private void async(Supplier<Object> supplier) {
+        try {
+            CompletableFuture.supplyAsync(supplier).get();
+        } catch (InterruptedException | ExecutionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     //TODO: implement receiving JSON dumps
-    private void synchronousGetResults() {}
+    private JsonNode getResults() {}
 
     /**
-     * DON'T USE THIS (There's a reason it's private)
-     * It Will cause delays in places you don't want them
-     * @see Limelight#takeSnapshot(String)
-     * @param snapName the name of the snapshot (can be null for default naming)
-     */
-    private void SynchronousSnapshot(String snapName) {
-        URL url = generateURL("capturesnapshot");
-        try {
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            if (snapName != null && snapName != "") {
-                connection.setRequestProperty("snapname", snapName);
-            }
-            int responseCode = connection.getResponseCode();
-            if (responseCode != 200) {
-                System.err.println("Bad LL Request: " + responseCode + " " + connection.getResponseMessage());
-            }
-        } catch (IOException e) {
-            throw new IllegalArgumentException("I'm on Crack");
-        }
-    }
-
-    /**
-     * Take exactly one snapshot with the current limelight settings
+     * Take exactly one snapshot with the current limelight settings. Limited to 2 snapshots per second.
      * @param name the name of the snapshot
-     * @see Limelight#SynchronousSnapshot(String)
      */
-    public CompletableFuture<Void> takeSnapshot(String name) {
-        return CompletableFuture.supplyAsync(() -> { SynchronousSnapshot(name); return null; });
+    public void takeSnapshot(String name) {
+        ArrayList<Pair<String, String>> headers = new ArrayList<Pair<String, String>>();
+        headers.add(new Pair<String, String>("snapname", name));
+        async(() -> { getRequest("capturesnapshot", headers); return null; });
     }
 
     /**
-     * Take exactly one snapshot with the current limelight settings with default naming
+     * Take exactly one snapshot with the current limelight settings with default naming (name defaults to snap)
      * @see Limelight#SynchronousSnapshot(String)
      */
-    public CompletableFuture<Void> takeSnapshot() {
-        return CompletableFuture.supplyAsync(() -> { SynchronousSnapshot(null); return null; });
+    public void takeSnapshot() {
+        async(() -> { getRequest("capturesnapshot"); return null; });
     }
+
 
     //TODO: implement snapshot uploading
-    private void synchronousUploadSnapshot() {}
+    private JsonNode uploadSnapshot() {
+        
+    }
 
     //TODO: implement snapshot list
-    private void synchronousGetSnapshotNames() {}
-
-    /**
-     * DON'T USE THIS (There's a reason it's private)
-     * It Will cause delays in places you don't want them
-     * @see Limelight#deleteAllSnapshots()
-     */
-    private void synchronousDeleteAllSnapshots() {
-        URL url = generateURL("deletesnapshots");
-        try {
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            int responseCode = connection.getResponseCode();
-            if (responseCode != 200) {
-                System.err.println("Bad LL Request: " + responseCode + " " + connection.getResponseMessage());
-            }
-        } catch (IOException e) {
-            throw new IllegalArgumentException("I'm on Crack");
-        }
-    }
+    private void getSnapshotNames() {}
 
     /**
      * Delete all snapshots on the limelight
      * @see Limelight#synchronousDeleteAllSnapshots()
      */
-    public CompletableFuture<Void> deleteAllSnapshots() {
-        return CompletableFuture.supplyAsync(() -> { synchronousDeleteAllSnapshots(); return null; });
+    public void deleteAllSnapshots() {
+        async(() -> { getRequest("deletesnapshots"); return null; });
     }
-
-
 }
