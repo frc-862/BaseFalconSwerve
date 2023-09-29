@@ -15,6 +15,7 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -25,8 +26,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Swerve extends SubsystemBase {
-    public SwerveDriveOdometry swerveOdometry;
     public SwerveModule[] mSwerveMods;
+    public SwerveDrivePoseEstimator poseEstimator;
     // public Pigeon2 gyro;
 
     public AHRS gyro;// = new AHRS(SPI.Port.kMXP);
@@ -85,7 +86,7 @@ public class Swerve extends SubsystemBase {
         Timer.delay(1.0);
         // resetModulesToAbsolute();
 
-        swerveOdometry = new SwerveDriveOdometry(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions());
+        this.poseEstimator = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), getPose(), null, null);
     }
 
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
@@ -127,11 +128,11 @@ public class Swerve extends SubsystemBase {
     }    
 
     public Pose2d getPose() {
-        return swerveOdometry.getPoseMeters();
+        return poseEstimator.getEstimatedPosition();
     }
 
     public void resetOdometry(Pose2d pose) {
-        swerveOdometry.resetPosition(getYaw(), getModulePositions(), pose);
+        poseEstimator.resetPosition(getYaw(), getModulePositions(), pose);
     }
 
     public SwerveModuleState[] getModuleStates(){
@@ -168,7 +169,7 @@ public class Swerve extends SubsystemBase {
 
     @Override
     public void periodic(){
-        swerveOdometry.update(getYaw(), getModulePositions());  
+        poseEstimator.update(getYaw(), getModulePositions());  
 
         for(SwerveModule mod : mSwerveMods){
             // SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
