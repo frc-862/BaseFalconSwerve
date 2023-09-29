@@ -167,17 +167,20 @@ public class Swerve extends SubsystemBase {
         return Rotation2d.fromDegrees(gyro.getYaw());
     }
 
-    // public void resetModulesToAbsolute(){
-    //     for(SwerveModule mod : mSwerveMods){
-    //         mod.resetToAbsolute();
-    //     }
-    // }
+    /**
+     * @return true if we trust the vision data, false if we don't
+     */
+    public boolean trustVision() {
+        return pose != null;
+    }
 
     @Override
     public void periodic(){
         poseEstimator.update(getYaw(), getModulePositions());
-        pose = new Limelight("limelight").getBotPose();
-        poseEstimator.addVisionMeasurement(pose.toPose2d(), Timer.getFPGATimestamp() - (pose.getLatency()/1000));
+        pose = new Limelight("limelight").getAlliancePose();
+        if (trustVision()) {
+            poseEstimator.addVisionMeasurement(pose.toPose2d(), Timer.getFPGATimestamp() - (pose.getLatency()/1000));
+        }
 
         field.setRobotPose(getPose());
 

@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 
 public class Limelight {
     private NetworkTable table;
@@ -217,7 +218,11 @@ public class Limelight {
      * @return a new Pose4d object with the values from the array
      */
     private Pose4d toPose4d(double[] ntValues) {
-        return new Pose4d(new Translation3d(ntValues[0], ntValues[1], ntValues[2]), new Rotation3d(ntValues[3], ntValues[4], ntValues[5]), ntValues[6]);
+        if (ntValues.length == 7){
+            return new Pose4d(new Translation3d(ntValues[0], ntValues[1], ntValues[2]), new Rotation3d(ntValues[3], ntValues[4], ntValues[5]), ntValues[6]);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -226,7 +231,11 @@ public class Limelight {
      * @return a new Pose3d object with the values from the array
      */
     private Pose3d toPose3d(double[] ntValues) {
-        return new Pose3d(new Translation3d(ntValues[0], ntValues[1], ntValues[2]), new Rotation3d(ntValues[3], ntValues[4], ntValues[5]));
+        if (ntValues.length == 6){
+            return new Pose3d(new Translation3d(ntValues[0], ntValues[1], ntValues[2]), new Rotation3d(ntValues[3], ntValues[4], ntValues[5]));
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -235,6 +244,20 @@ public class Limelight {
      */
     public Pose4d getBotPose() {
         return toPose4d(getArrayNT("botpose"));
+    }
+
+    /**
+     * Automatically return either the blue or red alliance pose
+     * @see Limelight#getBotPoseBlue()
+     * @see Limelight#getBotPoseRed()
+     * @return Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw), total latency (cl+tl)
+     */
+    public Pose4d getAlliancePose() {
+        if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
+            return getBotPoseBlue();
+        } else {
+            return getBotPoseRed();
+        }
     }
 
     /**
