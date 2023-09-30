@@ -3,6 +3,9 @@ package frc.robot.subsystems;
 import frc.robot.SwerveModule;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Constants.RobotMap;
+import frc.robot.Constants.VisionConstants;
+import frc.lib.util.Limelight;
+import frc.lib.util.Pose4d;
 import frc.lib.util.SwerveModuleConstants;
 import frc.robot.Constants.DrivetrainConstants.Offsets;
 
@@ -15,18 +18,25 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Swerve extends SubsystemBase {
-    public SwerveDriveOdometry swerveOdometry;
     public SwerveModule[] mSwerveMods;
+    public SwerveDrivePoseEstimator poseEstimator;
+    private Pose4d pose;
+    private Field2d field = new Field2d();
+    private Field2d visionField = new Field2d();
+    private Field2d odoField = new Field2d();
     // public Pigeon2 gyro;
 
     public AHRS gyro;// = new AHRS(SPI.Port.kMXP);
@@ -85,7 +95,8 @@ public class Swerve extends SubsystemBase {
         Timer.delay(1.0);
         // resetModulesToAbsolute();
 
-        swerveOdometry = new SwerveDriveOdometry(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions());
+        this.poseEstimator = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), new Limelight("limelight").getAlliancePose().toPose2d());
+        this.poseEstimator.update(getYaw(), getModulePositions());
     }
 
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
@@ -127,11 +138,11 @@ public class Swerve extends SubsystemBase {
     }    
 
     public Pose2d getPose() {
-        return swerveOdometry.getPoseMeters();
+        return poseEstimator.getEstimatedPosition();
     }
 
     public void resetOdometry(Pose2d pose) {
-        swerveOdometry.resetPosition(getYaw(), getModulePositions(), pose);
+        poseEstimator.resetPosition(getYaw(), getModulePositions(), pose);
     }
 
     public SwerveModuleState[] getModuleStates(){
@@ -160,15 +171,28 @@ public class Swerve extends SubsystemBase {
         return Rotation2d.fromDegrees(gyro.getYaw());
     }
 
-    // public void resetModulesToAbsolute(){
-    //     for(SwerveModule mod : mSwerveMods){
-    //         mod.resetToAbsolute();
-    //     }
-    // }
+    /**
+     * @return true if we trust the vision data, false if we don't
+     */
+    public boolean trustVision() {
+        return (pose != null) && (new Limelight("limelight").hasTarget());
+    }
 
     @Override
     public void periodic(){
-        swerveOdometry.update(getYaw(), getModulePositions());  
+        poseEstimator.updateWithTime(Timer.getFPGATimestamp(), getYaw(), getModulePositions());
+        pose = new Limelight("limelight").getAlliancePose();
+        if (trustVision()) {
+            poseEstimator.addVisionMeasurement(pose.toPose2d(), Timer.getFPGATimestamp() - Units.millisecondsToSeconds(pose.getLatency()) - VisionConstants.PROCESS_LATENCY);
+        }
+
+        field.setRobotPose(getPose());
+        visionField.setRobotPose(pose.toPose2d());
+        odoField.setRobotPose(poseEstimator.getEstimatedPosition());
+
+        SmartDashboard.putData("field", field);
+        SmartDashboard.putData("visionField", visionField);
+        SmartDashboard.putData("odoField", odoField);
 
         for(SwerveModule mod : mSwerveMods){
             // SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
