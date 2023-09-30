@@ -389,10 +389,10 @@ public class Limelight {
 
     /**
      * Sets limelight’s crop rectangle. The pipeline must utilize the default crop rectangle in the web interface.
-     * @param xMin the minimum x value of the crop rectangle
-     * @param yMin the minimum y value of the crop rectangle
-     * @param xMax the maximum x value of the crop rectangle
-     * @param yMax the maximum y value of the crop rectangle
+     * @param xMin the minimum x value of the crop rectangle (-1 to 1)
+     * @param yMin the minimum y value of the crop rectangle (-1 to 1)
+     * @param xMax the maximum x value of the crop rectangle (-1 to 1)
+     * @param yMax the maximum y value of the crop rectangle (-1 to 1)
      */
     public void setCropSize(double xMin, double yMin, double xMax, double yMax) {
         setArrayNT("crop", new double[] {xMin, xMax, yMin, yMax});
