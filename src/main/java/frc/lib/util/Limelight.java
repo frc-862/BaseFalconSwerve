@@ -211,7 +211,7 @@ public class Limelight {
     /**
      * @return Class ID of primary neural detector result or neural classifier result
      */
-    public String getClassID() {
+    public String getNeuralClassID() {
         return getStringNT("tclass");
     }
 
@@ -396,6 +396,22 @@ public class Limelight {
      */
     public void setCropSize(double xMin, double yMin, double xMax, double yMax) {
         setArrayNT("crop", new double[] {xMin, xMax, yMin, yMax});
+    }
+
+    /**
+     * Sets limelight’s camera position, relative to the robot's center
+     * @param pose the camera's position, with X as front/back, Y as left/right, and Z as up/down, in meters
+     */
+    public void setCameraPoseRobotSpace(Pose3d pose) {
+        double[] ntValues = new double[6];
+        ntValues[0] = pose.getX();
+        ntValues[1] = pose.getY();
+        ntValues[2] = pose.getZ();
+        ntValues[3] = pose.getRotation().getX();
+        ntValues[4] = pose.getRotation().getY();
+        ntValues[5] = pose.getRotation().getZ();
+
+        setArrayNT("camerapose_robotspace_set", ntValues);
     }
 
 
