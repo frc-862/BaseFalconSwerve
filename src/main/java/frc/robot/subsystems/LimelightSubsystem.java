@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import java.util.concurrent.ExecutionException;
 
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -33,11 +34,9 @@ public class LimelightSubsystem extends SubsystemBase {
         System.out.println("getTVert: " + limelight.getTVert());
         System.out.println("getPipeline: " + limelight.getPipeline());
         System.out.println("getTargetJson: " + limelight.getTargetJSON());
-        System.out.println("getClassID: " + limelight.getClassID());
+        System.out.println("getClassID: " + limelight.getNeuralClassID());
         System.out.println("getAverageHSV: " + limelight.getAverageHSV().toString());
-        System.out.println("getBotPose: " + limelight.getBotPose());
-        System.out.println("getBotPoseBlue: " + limelight.getBotPoseBlue());
-        System.out.println("getBotPoseRed: " + limelight.getBotPoseRed());
+        System.out.println("getBotPose: " + limelight.getAlliancePose());
         System.out.println("getCamPoseTargetSpace: " + limelight.getCamPoseTargetSpace());
         System.out.println("getCamPoseRobotSpace: " + limelight.getCamPoseRobotSpace());
         System.out.println("getTargetPoseCameraSpace: " + limelight.getTargetPoseCameraSpace());

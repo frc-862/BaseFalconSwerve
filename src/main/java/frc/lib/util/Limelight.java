@@ -9,7 +9,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -204,8 +206,8 @@ public class Limelight {
     /**
      * @return Full JSON dump of targeting results
      */
-    public String getTargetJSON() {
-        return getStringNT("json");
+    public JsonNode getTargetJSON() {
+        return parseJson(getStringNT("json"));
     }
 
     /**
@@ -399,7 +401,7 @@ public class Limelight {
     }
 
     /**
-     * Sets limelight’s camera position, relative to the robot's center
+     * @deprecated use limelight pipeline instead
      * @param pose the camera's position, with X as front/back, Y as left/right, and Z as up/down, in meters
      */
     public void setCameraPoseRobotSpace(Pose3d pose) {
@@ -434,16 +436,19 @@ public class Limelight {
         }
     }
 
+
     /**
-     * send a GET request to the limelight with the specified suffix
+     * generic http request to the limelight
      * @param suffix the suffix to add to the base url (eg "deletesnapshots", "capturesnapshot")
+     * @param type the type of request to send (eg "GET", "POST")
+     * @param headers the headers to send with the request
      * @return the response message from the limelight
      */
-    private String getRequest(String suffix, ArrayList<Pair<String, String>> headers) {
+    private String httpRequest(String suffix, String type, ArrayList<Pair<String, String>> headers) {
         URL url = generateURL(suffix);
         try {
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
+            connection.setRequestMethod(type);
             int responseCode = connection.getResponseCode();
             for (Pair<String, String> header : headers) {
                 connection.setRequestProperty(header.getFirst(), header.getSecond());
@@ -458,11 +463,20 @@ public class Limelight {
         }
     }
 
+    /**
+     * send a GET request to the limelight with the specified suffix
+     * @param suffix the suffix to add to the base url (eg "deletesnapshots", "capturesnapshot")
+     * @return the response message from the limelight
+     */
+    private String getRequest(String suffix, ArrayList<Pair<String, String>> headers) {
+        return httpRequest(suffix, "GET", headers);
+    }
+
     private String getRequest(String suffix) {
         return getRequest(suffix, new ArrayList<Pair<String, String>>());
     }
 
-    private String asyncString(Supplier<Object> supplier) {
+    private String async(Supplier<Object> supplier) {
         try {
             return (String) CompletableFuture.supplyAsync(supplier).get();
         } catch (InterruptedException | ExecutionException e) {
@@ -471,18 +485,6 @@ public class Limelight {
             return "";
         }
     }
-
-    private void async(Supplier<Object> supplier) {
-        try {
-            CompletableFuture.supplyAsync(supplier).get();
-        } catch (InterruptedException | ExecutionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
-    //TODO: implement receiving JSON dumps
-    private JsonNode getResults() {}
 
     /**
      * Take exactly one snapshot with the current limelight settings. Limited to 2 snapshots per second.
@@ -502,14 +504,24 @@ public class Limelight {
         async(() -> { getRequest("capturesnapshot"); return null; });
     }
 
+    /**
+     * Return a list of filenames of all snapshots on the limelight
+     * @return
+     */
+    private String[] getSnapshotNames() {
+        String snapshotList = async(() -> getRequest("getsnapshotmanifest"));
 
-    //TODO: implement snapshot uploading
-    private JsonNode uploadSnapshot() {
-        
+        //Remove the brackets from the string
+        snapshotList = snapshotList.substring(1, snapshotList.length() - 1);
+        //Split the string by commas
+        String[] snapshotArray = snapshotList.split(",");
+        //Remove the quotes from the strings
+        for (int i = 0; i < snapshotArray.length; i++) {
+            snapshotArray[i] = snapshotArray[i].substring(1, snapshotArray[i].length() - 1);
+        }
+
+        return snapshotArray;
     }
-
-    //TODO: implement snapshot list
-    private void getSnapshotNames() {}
 
     /**
      * Delete all snapshots on the limelight
@@ -517,5 +529,24 @@ public class Limelight {
      */
     public void deleteAllSnapshots() {
         async(() -> { getRequest("deletesnapshots"); return null; });
+    }
+
+    /**
+     * Return the limelight's current hardware report
+     * @return a json object containing the hardware report
+     */
+    public JsonNode getHWReport() {
+        String rawReport = async(() -> getRequest("hwreport"));
+        return parseJson(rawReport);
+    }
+
+    private JsonNode parseJson(String raw) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readTree(raw);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
