@@ -178,6 +178,15 @@ public class Swerve extends SubsystemBase {
         return (pose != null) && (new Limelight("limelight").hasTarget());
     }
 
+    /**
+     * Gets the kinematics of the robot.
+     * 
+     * @return the kinematics of the robot
+     */
+    public SwerveDriveKinematics getDriveKinematics() {
+        return DrivetrainConstants.SWERVE_KINEMATICS;
+    }
+
     @Override
     public void periodic(){
         poseEstimator.updateWithTime(Timer.getFPGATimestamp(), getYaw(), getModulePositions());

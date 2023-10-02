@@ -4,6 +4,8 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.auto.AutonomousCommandFactory;
+import frc.robot.Constants.AutonomousConstants;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.commands.TeleopSwerve;
 import frc.robot.subsystems.LimelightSubsystem;
@@ -15,6 +17,9 @@ public class RobotContainer {
 
     private static final XboxController driver = new XboxController(ControllerConstants.DRIVER_CONTROLLER_PORT);
 
+    // private static final AutonomousCommandFactory autoFactory = new AutonomousCommandFactory(drivetrain::getPose, drivetrain::resetOdometry, drivetrain.getDriveKinematics(),
+    //         AutonomousConstants.DRIVE_PID_CONSTANTS, AutonomousConstants.THETA_PID_CONSTANTS, AutonomousConstants.POSE_PID_CONSTANTS, drivetrain::setStates, drivetrain);
+            
     public RobotContainer() {
 
         // Configure the trigger bindings
