@@ -1,6 +1,9 @@
 package frc.lib.util;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -456,7 +459,20 @@ public class Limelight {
             if (responseCode != 200) {
                 System.err.println("Bad LL Request: " + responseCode + " " + connection.getResponseMessage());
             }
-            return connection.getResponseMessage(); //probably use getContent() here instead or smthn
+
+            //Chatgpt wrote this lol
+            // Read the response content as a String
+            StringBuilder content = new StringBuilder();
+            try (InputStream inputStream = connection.getInputStream();
+                InputStreamReader reader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(reader)) {
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    content.append(line);
+                }
+            }
+
+            return content.toString();
         } catch (IOException e) {
             e.printStackTrace();
             throw new IllegalArgumentException("I'm on Crack");
@@ -508,23 +524,9 @@ public class Limelight {
      * Return a list of filenames of all snapshots on the limelight
      * @return
      */
-    public String[] getSnapshotNames() {
-        try {
-            String snapshotList = async(() -> getRequest("getsnapshotmanifest"));
-
-            //Remove the brackets from the string
-            snapshotList = snapshotList.substring(1, snapshotList.length() - 1);
-            //Split the string by commas
-            String[] snapshotArray = snapshotList.split(",");
-            //Remove the quotes from the strings
-            for (int i = 0; i < snapshotArray.length; i++) {
-                snapshotArray[i] = snapshotArray[i].substring(1, snapshotArray[i].length() - 1);
-            }
-
-            return snapshotArray;
-        } catch (StringIndexOutOfBoundsException e ) {
-            return new String[]{};
-        }
+    public JsonNode getSnapshotNames() {
+        String rawReport = async(() -> getRequest("snapshotmanifest"));
+        return parseJson(rawReport);
     }
 
     /**
