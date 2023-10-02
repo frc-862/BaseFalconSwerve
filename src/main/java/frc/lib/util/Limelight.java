@@ -125,10 +125,9 @@ public class Limelight {
         return getDoubleNT("tv") == 1.0;
     }
 
-    //TODO: add limelight 3 fov
     /**
      * Horizontal Offset From Crosshair To Target
-     * @return (LL1: -27 degrees to 27 degrees | LL2: -29.8 to 29.8 degrees)
+     * @return (LL1: -27 degrees to 27 degrees | LL2: -29.8 to 29.8 degrees | LL3: -30 to 30 degrees)
      */
     public double getTargetX() {
         return getDoubleNT("tx");
@@ -137,7 +136,7 @@ public class Limelight {
     //TODO: add limelight 3 fov
     /**
      * Vertical Offset From Crosshair To Target
-     * @return (LL1: -20.5 degrees to 20.5 degrees | LL2: -24.85 to 24.85 degrees)
+     * @return (LL1: -20.5 degrees to 20.5 degrees | LL2: -24.85 to 24.85 degrees | -24 to 24 degrees)
      */
     public double getTargetY() {
         return getDoubleNT("ty");
