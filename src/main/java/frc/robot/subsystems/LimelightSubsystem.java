@@ -45,8 +45,11 @@ public class LimelightSubsystem extends SubsystemBase {
         //Need to test ledmode setting, cammode, streamode, pipeline, crop, 
         System.out.println("getBaseURL: " + limelight.getBaseUrl().toString());
 
+        System.out.println("snapshots: " + limelight.getSnapshotNames());
+        System.out.println("hwreport: " + limelight.getHWReport());
+
         if (count == 999) {
-            limelight.takeSnapshot("brennynisbad");
+            limelight.deleteAllSnapshots();
         }
         count += 1;
     }

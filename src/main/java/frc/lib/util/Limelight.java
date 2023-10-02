@@ -456,7 +456,7 @@ public class Limelight {
             if (responseCode != 200) {
                 System.err.println("Bad LL Request: " + responseCode + " " + connection.getResponseMessage());
             }
-            return connection.getResponseMessage();
+            return connection.getResponseMessage(); //probably use getContent() here instead or smthn
         } catch (IOException e) {
             e.printStackTrace();
             throw new IllegalArgumentException("I'm on Crack");
@@ -508,19 +508,23 @@ public class Limelight {
      * Return a list of filenames of all snapshots on the limelight
      * @return
      */
-    private String[] getSnapshotNames() {
-        String snapshotList = async(() -> getRequest("getsnapshotmanifest"));
+    public String[] getSnapshotNames() {
+        try {
+            String snapshotList = async(() -> getRequest("getsnapshotmanifest"));
 
-        //Remove the brackets from the string
-        snapshotList = snapshotList.substring(1, snapshotList.length() - 1);
-        //Split the string by commas
-        String[] snapshotArray = snapshotList.split(",");
-        //Remove the quotes from the strings
-        for (int i = 0; i < snapshotArray.length; i++) {
-            snapshotArray[i] = snapshotArray[i].substring(1, snapshotArray[i].length() - 1);
+            //Remove the brackets from the string
+            snapshotList = snapshotList.substring(1, snapshotList.length() - 1);
+            //Split the string by commas
+            String[] snapshotArray = snapshotList.split(",");
+            //Remove the quotes from the strings
+            for (int i = 0; i < snapshotArray.length; i++) {
+                snapshotArray[i] = snapshotArray[i].substring(1, snapshotArray[i].length() - 1);
+            }
+
+            return snapshotArray;
+        } catch (StringIndexOutOfBoundsException e ) {
+            return new String[]{};
         }
-
-        return snapshotArray;
     }
 
     /**
