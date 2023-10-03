@@ -11,12 +11,10 @@ import frc.robot.Constants.DrivetrainConstants.Offsets;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -26,7 +24,6 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -42,15 +39,14 @@ public class Swerve extends SubsystemBase {
     private Field2d odoField = new Field2d();
     // public Pigeon2 gyro;
 
-    public AHRS gyro;// = new AHRS(SPI.Port.kMXP);
+    public Pigeon2 gyro;// = new AHRS(SPI.Port.kMXP);
 
     private Limelight limelight;
 
     public Swerve() {
-        // gyro = new Pigeon2(RobotMap.CAN.PIGEON, RobotMap.BUS.PIGEON);
-        // gyro.getConfigurator().apply(new Pigeon2Configuration());
-        // zeroGyro();
-        gyro = new AHRS(SPI.Port.kMXP);
+        gyro = new Pigeon2(RobotMap.CAN.PIGEON, RobotMap.BUS.PIGEON);
+        gyro.getConfigurator().apply(new Pigeon2Configuration());
+        zeroGyro();
 
         //this can be compacted significantly, but this is what you have to do to make it work with our existing constants
     mSwerveMods = new SwerveModule[] {
@@ -171,13 +167,12 @@ public class Swerve extends SubsystemBase {
     }
 
     public void zeroGyro(){
-        // gyro.setYaw(0);
-        gyro.reset();
+        gyro.setYaw(0);
     }
 
     public Rotation2d getYaw() {
         // return gyro.getRotation2d(); //there used to be a invert gyro thingy here but I think phoenix 6 removes the need for that
-        return Rotation2d.fromDegrees(gyro.getYaw());
+        return Rotation2d.fromDegrees(gyro.getYaw().getValue());
     }
 
     /**
