@@ -177,7 +177,7 @@ public class Swerve extends SubsystemBase {
 
     public Rotation2d getYaw() {
         // return gyro.getRotation2d(); //there used to be a invert gyro thingy here but I think phoenix 6 removes the need for that
-        return Rotation2d.fromDegrees(gyro.getYaw());
+        return Rotation2d.fromDegrees(gyro.getYaw()); // TODO test if direction works
     }
 
     /**

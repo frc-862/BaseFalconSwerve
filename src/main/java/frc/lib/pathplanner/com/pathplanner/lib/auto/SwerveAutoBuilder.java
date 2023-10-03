@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import frc.lib.auto.PIDConstants;
 
 public class SwerveAutoBuilder extends BaseAutoBuilder {
     private final SwerveDriveKinematics kinematics;

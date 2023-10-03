@@ -1,6 +1,5 @@
 package frc.lib.shuffleboard;
 
-import java.lang.reflect.Array;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;

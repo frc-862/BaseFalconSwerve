@@ -11,14 +11,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.lib.pathplanner.com.pathplanner.lib.PathConstraints;
 import frc.lib.pathplanner.com.pathplanner.lib.PathPlanner;
 import frc.lib.pathplanner.com.pathplanner.lib.PathPlannerTrajectory;
 import frc.lib.pathplanner.com.pathplanner.lib.PathPoint;
-import frc.lib.pathplanner.com.pathplanner.lib.auto.PIDConstants;
+import frc.lib.auto.PIDConstants;
 import frc.lib.pathplanner.com.pathplanner.lib.auto.SwerveAutoBuilder;
 import frc.lib.pathplanner.com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import frc.lib.pathplanner.com.pathplanner.lib.server.PathPlannerServer;
@@ -35,7 +34,6 @@ public class AutonomousCommandFactory {
     private final PIDConstants thetaConstants;
     private final PIDConstants poseConstants;
     private final Consumer<SwerveModuleState[]> setStates;
-    private final Runnable resyncNeo;
     private final Subsystem[] drivetrain;
 
     /**
@@ -47,13 +45,12 @@ public class AutonomousCommandFactory {
      * @param driveConstants drive motor PIDConstants
      * @param thetaConstants rotational motor PIDConstants
      * @param setStates used to output module states
-     * @param resyncNeo method to call and resync neo and abs encoders, will run on robot init
      * @param drivetrain subsystem drivetrain
      */
     public AutonomousCommandFactory(Supplier<Pose2d> getPose, Consumer<Pose2d> resetPose,
             SwerveDriveKinematics kinematics, PIDConstants driveConstants,
             PIDConstants thetaConstants, PIDConstants poseConstants,
-            Consumer<SwerveModuleState[]> setStates, Runnable resyncNeo, Subsystem... drivetrain) {
+            Consumer<SwerveModuleState[]> setStates, Subsystem... drivetrain) {
         this.getPose = getPose;
         this.resetPose = resetPose;
         this.kinematics = kinematics;
@@ -61,7 +58,6 @@ public class AutonomousCommandFactory {
         this.thetaConstants = thetaConstants;
         this.poseConstants = poseConstants;
         this.setStates = setStates;
-        this.resyncNeo = resyncNeo;
         this.drivetrain = drivetrain;
     }
 
@@ -115,11 +111,6 @@ public class AutonomousCommandFactory {
 
     public PathPoint makePathPoint(double x, double y, double heading) {
         return new PathPoint(new Translation2d(x, y), new Rotation2d(heading));
-    }
-
-    public void resyncNeoEncoder() {
-        resyncNeo.run();
-        System.out.println("Resynced Neo Encoders to Absolute");
     }
 
     public static void connectToServer(int ServerPort) {

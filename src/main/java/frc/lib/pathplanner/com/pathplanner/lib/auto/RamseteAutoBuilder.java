@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import frc.lib.auto.PIDConstants;
 
 public class RamseteAutoBuilder extends BaseAutoBuilder {
     private final RamseteController controller;
