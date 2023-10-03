@@ -20,7 +20,9 @@ import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
@@ -33,6 +35,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Swerve extends SubsystemBase {
     public SwerveModule[] mSwerveMods;
     public SwerveDrivePoseEstimator poseEstimator;
+    public SwerveDrivePoseEstimator swerveodo;
     private Pose4d pose;
     private Field2d field = new Field2d();
     private Field2d visionField = new Field2d();
@@ -40,6 +43,8 @@ public class Swerve extends SubsystemBase {
     // public Pigeon2 gyro;
 
     public AHRS gyro;// = new AHRS(SPI.Port.kMXP);
+
+    private Limelight limelight;
 
     public Swerve() {
         // gyro = new Pigeon2(RobotMap.CAN.PIGEON, RobotMap.BUS.PIGEON);
@@ -88,15 +93,19 @@ public class Swerve extends SubsystemBase {
                 RobotMap.BUS.CANCODER,
                 Rotation2d.fromRotations(Offsets.BACK_RIGHT_STEER_OFFSET)))
         };
-
+ 
         /* By pausing init for a second before setting module offsets, we avoid a bug with inverting motors.
          * See https://github.com/Team364/BaseFalconSwerve/issues/8 for more info.
          */
         Timer.delay(1.0);
         // resetModulesToAbsolute();
 
-        this.poseEstimator = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), new Limelight("limelight").getAlliancePose().toPose2d());
+        this.limelight = new Limelight("limelight");
+        limelight.setCameraPoseRobotSpace(new Pose3d(3.375, 0, 21.6, new Rotation3d(0, 0, 0)));
+        this.poseEstimator = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), limelight.getAlliancePose().toPose2d());
         this.poseEstimator.update(getYaw(), getModulePositions());
+        this.swerveodo = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), new Pose2d());
+        this.swerveodo.update(getYaw(), getModulePositions());
     }
 
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
@@ -175,7 +184,7 @@ public class Swerve extends SubsystemBase {
      * @return true if we trust the vision data, false if we don't
      */
     public boolean trustVision() {
-        return (pose != null) && (new Limelight("limelight").hasTarget());
+        return (pose != null) && (limelight.hasTarget());
     }
 
     /**
@@ -190,14 +199,15 @@ public class Swerve extends SubsystemBase {
     @Override
     public void periodic(){
         poseEstimator.updateWithTime(Timer.getFPGATimestamp(), getYaw(), getModulePositions());
-        pose = new Limelight("limelight").getAlliancePose();
+        swerveodo.updateWithTime(Timer.getFPGATimestamp(), getYaw(), getModulePositions());
+        pose = limelight.getAlliancePose();
         if (trustVision()) {
             poseEstimator.addVisionMeasurement(pose.toPose2d(), Timer.getFPGATimestamp() - Units.millisecondsToSeconds(pose.getLatency()) - VisionConstants.PROCESS_LATENCY);
         }
 
         field.setRobotPose(getPose());
         visionField.setRobotPose(pose.toPose2d());
-        odoField.setRobotPose(poseEstimator.getEstimatedPosition());
+        odoField.setRobotPose(swerveodo.getEstimatedPosition());
 
         SmartDashboard.putData("field", field);
         SmartDashboard.putData("visionField", visionField);
