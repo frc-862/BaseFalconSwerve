@@ -37,9 +37,8 @@ public class Swerve extends SubsystemBase {
     private Field2d field = new Field2d();
     private Field2d visionField = new Field2d();
     private Field2d odoField = new Field2d();
-    // public Pigeon2 gyro;
 
-    public Pigeon2 gyro;// = new AHRS(SPI.Port.kMXP);
+    public Pigeon2 gyro;
 
     private Limelight limelight;
 
