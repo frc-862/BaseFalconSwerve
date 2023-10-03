@@ -96,7 +96,7 @@ public class Swerve extends SubsystemBase {
         // resetModulesToAbsolute();
 
         this.limelight = new Limelight("limelight");
-        limelight.setCameraPoseRobotSpace(new Pose3d(3.375, 0, 21.6, new Rotation3d(0, 0, 0)));
+        // limelight.setCameraPoseRobotSpace(new Pose3d(Units.inchesToMeters(3.375), 0, Units.inchesToMeters(21.6), new Rotation3d(0, 0, 0)));
         this.poseEstimator = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), limelight.getAlliancePose().toPose2d());
         this.poseEstimator.update(getYaw(), getModulePositions());
         this.swerveodo = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), new Pose2d());
