@@ -100,7 +100,7 @@ public class Swerve extends SubsystemBase {
         this.poseEstimator = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), limelight.getAlliancePose().toPose2d());
         this.poseEstimator.update(getYaw(), getModulePositions());
         this.swerveodo = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), new Pose2d());
-        this.swerveodo.update(getYaw(), getModulePositions());
+        swerveodo.resetPosition(getYaw(), getModulePositions(), limelight.getAlliancePose().toPose2d());
     }
 
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
@@ -191,7 +191,7 @@ public class Swerve extends SubsystemBase {
         }
 
         field.setRobotPose(getPose());
-        visionField.setRobotPose(pose.toPose2d());
+        visionField.setRobotPose(pose.getX(), pose.getY(), pose.getRotation().toRotation2d());
         odoField.setRobotPose(swerveodo.getEstimatedPosition());
 
         SmartDashboard.putData("field", field);

@@ -233,7 +233,7 @@ public class Limelight {
      */
     private Pose4d toPose4d(double[] ntValues) {
         if (ntValues.length == 7){
-            return new Pose4d(new Translation3d(ntValues[0], ntValues[1], ntValues[2]), new Rotation3d(ntValues[3], ntValues[4], ntValues[5]), ntValues[6]);
+            return new Pose4d(new Translation3d(ntValues[0], ntValues[1], ntValues[2]), new Rotation3d(Math.toRadians(ntValues[3]), Math.toRadians(ntValues[4]), Math.toRadians(ntValues[5])), ntValues[6]);
         } else {
             return null;
         }
