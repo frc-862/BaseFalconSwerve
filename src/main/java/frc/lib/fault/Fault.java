@@ -43,7 +43,7 @@ public class Fault {
      * @param count
      */
     public Fault(String name, IntSupplier count) {
-        this(name, () -> count.getAsInt() > 1, () -> false, count);
+        this(name, () -> false, () -> count.getAsInt() > 1, count);
     }
 
     public String getName() {
@@ -53,6 +53,8 @@ public class Fault {
     public boolean get() {
         return current.getAsBoolean();
     }
+
+    public boolean getCurrent() {return get();};
 
     public boolean getSticky() {
         return sticky.getAsBoolean();
