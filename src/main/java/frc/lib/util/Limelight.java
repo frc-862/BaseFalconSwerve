@@ -1,16 +1,28 @@
 package frc.lib.util;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 
 public class Limelight {
     private NetworkTable table;
@@ -36,6 +48,10 @@ public class Limelight {
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Invalid IP");
         }
+    }
+
+    public String toString() {
+        return "Limelight: " + name + " at " + ip;
     }
 
     /**
@@ -109,10 +125,9 @@ public class Limelight {
         return getDoubleNT("tv") == 1.0;
     }
 
-    //TODO: add limelight 3 fov
     /**
      * Horizontal Offset From Crosshair To Target
-     * @return (LL1: -27 degrees to 27 degrees | LL2: -29.8 to 29.8 degrees)
+     * @return (LL1: -27 degrees to 27 degrees | LL2: -29.8 to 29.8 degrees | LL3: -30 to 30 degrees)
      */
     public double getTargetX() {
         return getDoubleNT("tx");
@@ -121,7 +136,7 @@ public class Limelight {
     //TODO: add limelight 3 fov
     /**
      * Vertical Offset From Crosshair To Target
-     * @return (LL1: -20.5 degrees to 20.5 degrees | LL2: -24.85 to 24.85 degrees)
+     * @return (LL1: -20.5 degrees to 20.5 degrees | LL2: -24.85 to 24.85 degrees | -24 to 24 degrees)
      */
     public double getTargetY() {
         return getDoubleNT("ty");
@@ -193,14 +208,14 @@ public class Limelight {
     /**
      * @return Full JSON dump of targeting results
      */
-    public String getTargetJSON() {
-        return getStringNT("json");
+    public JsonNode getTargetJSON() {
+        return parseJson(getStringNT("json"));
     }
 
     /**
      * @return Class ID of primary neural detector result or neural classifier result
      */
-    public String getClassID() {
+    public String getNeuralClassID() {
         return getStringNT("tclass");
     }
 
@@ -217,7 +232,11 @@ public class Limelight {
      * @return a new Pose4d object with the values from the array
      */
     private Pose4d toPose4d(double[] ntValues) {
-        return new Pose4d(new Translation3d(ntValues[0], ntValues[1], ntValues[2]), new Rotation3d(ntValues[3], ntValues[4], ntValues[5]), ntValues[6]);
+        if (ntValues.length == 7){
+            return new Pose4d(new Translation3d(ntValues[0], ntValues[1], ntValues[2]), new Rotation3d(ntValues[3], ntValues[4], ntValues[5]), ntValues[6]);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -226,31 +245,26 @@ public class Limelight {
      * @return a new Pose3d object with the values from the array
      */
     private Pose3d toPose3d(double[] ntValues) {
-        return new Pose3d(new Translation3d(ntValues[0], ntValues[1], ntValues[2]), new Rotation3d(ntValues[3], ntValues[4], ntValues[5]));
+        if (ntValues.length == 6){
+            return new Pose3d(new Translation3d(ntValues[0], ntValues[1], ntValues[2]), new Rotation3d(ntValues[3], ntValues[4], ntValues[5]));
+        } else {
+            return null;
+        }
     }
 
     /**
-     * Robot transform in field-space
+     * Automatically return either the blue or red alliance pose
+     * @see Limelight#getBotPoseBlue()
+     * @see Limelight#getBotPoseRed()
+     * Robot transform is in field-space (alliance color driverstation WPILIB origin)
      * @return Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw), total latency (cl+tl)
      */
-    public Pose4d getBotPose() {
-        return toPose4d(getArrayNT("botpose"));
-    }
-
-    /**
-     * Robot transform in field-space (blue driverstation WPILIB origin)
-     * @return Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw), total latency (cl+tl)
-     */
-    public Pose4d getBotPoseBlue() {
-        return toPose4d(getArrayNT("botpose_wpiblue"));
-    }
-
-    /**
-     * Robot transform in field-space (red driverstation WPILIB origin)
-     * @return Translation (X,Y,Z) Rotation(Roll,Pitch,Yaw), total latency (cl+tl)
-     */
-    public Pose4d getBotPoseRed() {
-        return toPose4d(getArrayNT("botpose_wpired"));
+    public Pose4d getAlliancePose() {
+        if (DriverStation.getAlliance() == DriverStation.Alliance.Blue) {
+            return toPose4d(getArrayNT("botpose_wpiblue"));
+        } else {
+            return toPose4d(getArrayNT("botpose_wpired"));
+        }
     }
 
 
@@ -285,7 +299,7 @@ public class Limelight {
     /**
      * @return ID of the primary in-view apriltag
      */
-    public int getAprilTagID() {
+    public int getApriltagID() {
         return getIntNT("tid");
     }
 
@@ -379,13 +393,29 @@ public class Limelight {
 
     /**
      * Sets limelight’s crop rectangle. The pipeline must utilize the default crop rectangle in the web interface.
-     * @param xMin the minimum x value of the crop rectangle
-     * @param yMin the minimum y value of the crop rectangle
-     * @param xMax the maximum x value of the crop rectangle
-     * @param yMax the maximum y value of the crop rectangle
+     * @param xMin the minimum x value of the crop rectangle (-1 to 1)
+     * @param yMin the minimum y value of the crop rectangle (-1 to 1)
+     * @param xMax the maximum x value of the crop rectangle (-1 to 1)
+     * @param yMax the maximum y value of the crop rectangle (-1 to 1)
      */
     public void setCropSize(double xMin, double yMin, double xMax, double yMax) {
         setArrayNT("crop", new double[] {xMin, xMax, yMin, yMax});
+    }
+
+    /**
+     * @deprecated use limelight pipeline instead
+     * @param pose the camera's position, with X as front/back, Y as left/right, and Z as up/down, in meters
+     */
+    public void setCameraPoseRobotSpace(Pose3d pose) {
+        double[] ntValues = new double[6];
+        ntValues[0] = pose.getX();
+        ntValues[1] = pose.getY();
+        ntValues[2] = pose.getZ();
+        ntValues[3] = pose.getRotation().getX();
+        ntValues[4] = pose.getRotation().getY();
+        ntValues[5] = pose.getRotation().getZ();
+
+        setArrayNT("camerapose_robotspace_set", ntValues);
     }
 
 
@@ -406,84 +436,122 @@ public class Limelight {
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Invalid Suffix");
         }
-
     }
 
-    //TODO: implement receiving JSON dumps
-    private void synchronousGetResults() {}
 
     /**
-     * DON'T USE THIS (There's a reason it's private)
-     * It Will cause delays in places you don't want them
-     * @see Limelight#takeSnapshot(String)
-     * @param snapName the name of the snapshot (can be null for default naming)
+     * generic http request to the limelight
+     * @param suffix the suffix to add to the base url (eg "deletesnapshots", "capturesnapshot")
+     * @param type the type of request to send (eg "GET", "POST")
+     * @param headers the headers to send with the request
+     * @return the response message from the limelight
      */
-    private void SynchronousSnapshot(String snapName) {
-        URL url = generateURL("capturesnapshot");
+    private String httpRequest(String suffix, String type, ArrayList<Pair<String, String>> headers) {
+        URL url = generateURL(suffix);
         try {
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            if (snapName != null && snapName != "") {
-                connection.setRequestProperty("snapname", snapName);
-            }
+            connection.setRequestMethod(type);
             int responseCode = connection.getResponseCode();
+            for (Pair<String, String> header : headers) {
+                connection.setRequestProperty(header.getFirst(), header.getSecond());
+            }
             if (responseCode != 200) {
                 System.err.println("Bad LL Request: " + responseCode + " " + connection.getResponseMessage());
             }
+
+            //Chatgpt wrote this lol
+            // Read the response content as a String
+            StringBuilder content = new StringBuilder();
+            try (InputStream inputStream = connection.getInputStream();
+                InputStreamReader reader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(reader)) {
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    content.append(line);
+                }
+            }
+
+            return content.toString();
         } catch (IOException e) {
+            e.printStackTrace();
             throw new IllegalArgumentException("I'm on Crack");
         }
     }
 
     /**
-     * Take exactly one snapshot with the current limelight settings
+     * send a GET request to the limelight with the specified suffix
+     * @param suffix the suffix to add to the base url (eg "deletesnapshots", "capturesnapshot")
+     * @return the response message from the limelight
+     */
+    private String getRequest(String suffix, ArrayList<Pair<String, String>> headers) {
+        return httpRequest(suffix, "GET", headers);
+    }
+
+    private String getRequest(String suffix) {
+        return getRequest(suffix, new ArrayList<Pair<String, String>>());
+    }
+
+    private String async(Supplier<Object> supplier) {
+        try {
+            return (String) CompletableFuture.supplyAsync(supplier).get();
+        } catch (InterruptedException | ExecutionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    /**
+     * Take exactly one snapshot with the current limelight settings. Limited to 2 snapshots per second.
      * @param name the name of the snapshot
-     * @see Limelight#SynchronousSnapshot(String)
      */
-    public CompletableFuture<Void> takeSnapshot(String name) {
-        return CompletableFuture.supplyAsync(() -> { SynchronousSnapshot(name); return null; });
+    public void takeSnapshot(String name) {
+        ArrayList<Pair<String, String>> headers = new ArrayList<Pair<String, String>>();
+        headers.add(new Pair<String, String>("snapname", name));
+        async(() -> { getRequest("capturesnapshot", headers); return null; });
     }
 
     /**
-     * Take exactly one snapshot with the current limelight settings with default naming
+     * Take exactly one snapshot with the current limelight settings with default naming (name defaults to snap)
      * @see Limelight#SynchronousSnapshot(String)
      */
-    public CompletableFuture<Void> takeSnapshot() {
-        return CompletableFuture.supplyAsync(() -> { SynchronousSnapshot(null); return null; });
+    public void takeSnapshot() {
+        async(() -> { getRequest("capturesnapshot"); return null; });
     }
 
-    //TODO: implement snapshot uploading
-    private void synchronousUploadSnapshot() {}
-
-    //TODO: implement snapshot list
-    private void synchronousGetSnapshotNames() {}
-
     /**
-     * DON'T USE THIS (There's a reason it's private)
-     * It Will cause delays in places you don't want them
-     * @see Limelight#deleteAllSnapshots()
+     * Return a list of filenames of all snapshots on the limelight
+     * @return
      */
-    private void synchronousDeleteAllSnapshots() {
-        URL url = generateURL("deletesnapshots");
-        try {
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            int responseCode = connection.getResponseCode();
-            if (responseCode != 200) {
-                System.err.println("Bad LL Request: " + responseCode + " " + connection.getResponseMessage());
-            }
-        } catch (IOException e) {
-            throw new IllegalArgumentException("I'm on Crack");
-        }
+    public JsonNode getSnapshotNames() {
+        String rawReport = async(() -> getRequest("snapshotmanifest"));
+        return parseJson(rawReport);
     }
 
     /**
      * Delete all snapshots on the limelight
      * @see Limelight#synchronousDeleteAllSnapshots()
      */
-    public CompletableFuture<Void> deleteAllSnapshots() {
-        return CompletableFuture.supplyAsync(() -> { synchronousDeleteAllSnapshots(); return null; });
+    public void deleteAllSnapshots() {
+        async(() -> { getRequest("deletesnapshots"); return null; });
     }
 
+    /**
+     * Return the limelight's current hardware report
+     * @return a json object containing the hardware report
+     */
+    public JsonNode getHWReport() {
+        String rawReport = async(() -> getRequest("hwreport"));
+        return parseJson(rawReport);
+    }
 
+    private JsonNode parseJson(String raw) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readTree(raw);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

@@ -32,7 +32,7 @@ public final class Constants {
         public static final double DRIVE_SUPPLY_THRESHOLD = 60d;
         public static final double DRIVE_SUPPLY_TIMEOUT = 0.25;
 
-        public static final double AZIMUTH_SUPPLY_LIMIT = 20d;
+        public static final double AZIMUTH_SUPPLY_LIMIT = 40d;
         public static final double AZIMUTH_SUPPLY_THRESHOLD = 40d;
         public static final double AZIMUTH_SUPPLY_TIMEOUT = 0.25;
 
@@ -41,12 +41,12 @@ public final class Constants {
 
         public static final double MAX_SPEED = Units.feetToMeters(16.2);
         public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_SPEED / Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
-        public static final double GEAR_RATIO = 6.12;
+        public static final double GEAR_RATIO = 6.75;
         public static final double WHEEL_DIAMETER = Units.inchesToMeters(4d);
         public static final double WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_DIAMETER;
-        public static final double ANGLE_RATIO = 12.8;
+        public static final double ANGLE_RATIO = 150/7;
 
-        public static final InvertedValue ANGLE_INVERT = InvertedValue.Clockwise_Positive;
+        public static final InvertedValue ANGLE_INVERT = InvertedValue.CounterClockwise_Positive;
         public static final InvertedValue DRIVE_INVERT = InvertedValue.Clockwise_Positive;
 
         public static final NeutralModeValue ANGLE_NEUTRAL = NeutralModeValue.Brake;
@@ -55,10 +55,10 @@ public final class Constants {
         // i swapped the left and right negations here in order to fix an issue with turn motors being oriented like an X instead of a diamond. There is likely some underlying cause that should be addressed, perhaps something to do with sensor inverts, or some other novel phoenix 6 thing
         // i do remember noticing similar behavior when using phoenix 6 on HaD, so that does point me to it being the underlying cause
         public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(
-            new Translation2d(-DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
-            new Translation2d(DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
+            new Translation2d(DRIVETRAIN_WHEELBASE_METERS / 2.0, -DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
             new Translation2d(-DRIVETRAIN_WHEELBASE_METERS / 2.0, -DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
-            new Translation2d(DRIVETRAIN_WHEELBASE_METERS / 2.0, -DRIVETRAIN_TRACKWIDTH_METERS / 2.0)
+            new Translation2d(DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
+            new Translation2d(-DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_TRACKWIDTH_METERS / 2.0)
         );
 
         public static final Rotation2d FRONT_LEFT_RESTING_ANGLE = Rotation2d.fromDegrees(-45d);
@@ -68,9 +68,9 @@ public final class Constants {
 
         // very BS tuning (no matter how well it works :P)
         public static final class AzimuthGains {
-            public static final double kP = 2.816;//22
+            public static final double kP = 3;//22
             public static final double kI = 0.0;//22d;
-            public static final double kD = 0.0;//0005d;
+            public static final double kD = 0.1;//0005d;
             public static final double kS = 3;//54d;
         }
 
@@ -88,11 +88,16 @@ public final class Constants {
         // Steer offsets for our modules
         public static final class Offsets {
             // swerve module absolute encoder offsets
-                public static final double FRONT_LEFT_STEER_OFFSET  = 0.250977;
-                public static final double FRONT_RIGHT_STEER_OFFSET = 0.462158;
-                public static final double BACK_LEFT_STEER_OFFSET   = 0.293457;
-                public static final double BACK_RIGHT_STEER_OFFSET  = 0.340820;
+                public static final double FRONT_LEFT_STEER_OFFSET  = -0.224609;
+                public static final double FRONT_RIGHT_STEER_OFFSET = -0.116699;
+                public static final double BACK_LEFT_STEER_OFFSET   = 0.132812;
+                public static final double BACK_RIGHT_STEER_OFFSET  = 0.322754;
         }
+    }
+
+    public static final class VisionConstants {
+        //This is a magic number from gridlock, may need to be changed or removed entirely
+        public static final double PROCESS_LATENCY = 0.0472;
     }
 
     // RobotMap Constants
@@ -105,21 +110,21 @@ public final class Constants {
             public static final int PDH = 21;
 
             // Front left CanIDs
-            public static final int FRONT_LEFT_DRIVE_MOTOR = 8;
-            public static final int FRONT_LEFT_AZIMUTH_MOTOR = 7;
-            public static final int FRONT_LEFT_CANCODER = 16;
+            public static final int FRONT_LEFT_DRIVE_MOTOR = 1;
+            public static final int FRONT_LEFT_AZIMUTH_MOTOR = 2;
+            public static final int FRONT_LEFT_CANCODER = 31;
             // Front right CanIDs
-            public static final int FRONT_RIGHT_DRIVE_MOTOR = 11;
-            public static final int FRONT_RIGHT_AZIMUTH_MOTOR = 12;
-            public static final int FRONT_RIGHT_CANCODER = 17;
+            public static final int FRONT_RIGHT_DRIVE_MOTOR = 3;
+            public static final int FRONT_RIGHT_AZIMUTH_MOTOR = 4;
+            public static final int FRONT_RIGHT_CANCODER = 33;
             // Back right CanIDs
-            public static final int BACK_RIGHT_DRIVE_MOTOR = 13;
-            public static final int BACK_RIGHT_AZIMUTH_MOTOR = 14;
-            public static final int BACK_RIGHT_CANCODER = 18;
+            public static final int BACK_RIGHT_DRIVE_MOTOR = 5;
+            public static final int BACK_RIGHT_AZIMUTH_MOTOR = 6;
+            public static final int BACK_RIGHT_CANCODER = 32;
             // Back left CanIDs
-            public static final int BACK_LEFT_DRIVE_MOTOR = 10;
-            public static final int BACK_LEFT_AZIMUTH_MOTOR = 9;
-            public static final int BACK_LEFT_CANCODER = 15;
+            public static final int BACK_LEFT_DRIVE_MOTOR = 7;
+            public static final int BACK_LEFT_AZIMUTH_MOTOR = 8;
+            public static final int BACK_LEFT_CANCODER = 34;
         }
 
         public static final class BUS {
