@@ -18,6 +18,7 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -37,15 +38,12 @@ public class Swerve extends SubsystemBase {
     private Field2d field = new Field2d();
     private Field2d visionField = new Field2d();
     private Field2d odoField = new Field2d();
-    // public Pigeon2 gyro;
-
-    public AHRS gyro;// = new AHRS(SPI.Port.kMXP);
+    public Pigeon2 gyro;
 
     public Swerve() {
-        // gyro = new Pigeon2(RobotMap.CAN.PIGEON, RobotMap.BUS.PIGEON);
-        // gyro.getConfigurator().apply(new Pigeon2Configuration());
-        // zeroGyro();
-        gyro = new AHRS(SPI.Port.kMXP);
+        gyro = new Pigeon2(RobotMap.CAN.PIGEON, RobotMap.BUS.PIGEON);
+        gyro.getConfigurator().apply(new Pigeon2Configuration());
+        zeroGyro();
 
         //this can be compacted significantly, but this is what you have to do to make it work with our existing constants
     mSwerveMods = new SwerveModule[] {
@@ -167,8 +165,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public Rotation2d getYaw() {
-        // return gyro.getRotation2d(); //there used to be a invert gyro thingy here but I think phoenix 6 removes the need for that
-        return Rotation2d.fromDegrees(gyro.getYaw());
+        return Rotation2d.fromDegrees(-gyro.getYaw().getValue());
     }
 
     /**
