@@ -107,7 +107,7 @@ public final class Constants {
         public static final class CAN {
             // Pigeon IMU ID
             public static final int PIGEON = 23;
-            // Power distrobution hub ID
+            // Power distribution hub ID
             public static final int PDH = 21;
 
             // Front left CanIDs
