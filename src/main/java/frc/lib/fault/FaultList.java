@@ -48,4 +48,28 @@ public class FaultList extends ArrayList<Fault> {
     public void merge(FaultList other) {
         this.addAll(other);
     }
+
+    public boolean[] currentToBooleanArray() {
+        Fault[] array = new Fault[this.size()];
+        array = this.toArray(array);
+        boolean[] output = new boolean[array.length];
+
+        for (int i = 0; i < array.length; i++) {
+            output[i] = array[i].get();
+        }
+
+        return output;
+    }
+
+    public boolean[] stickyToBooleanArray() {
+        Fault[] array = new Fault[this.size()];
+        array = this.toArray(array);
+        boolean[] output = new boolean[array.length];
+
+        for (int i = 0; i < array.length; i++) {
+            output[i] = array[i].getSticky();
+        }
+
+        return output;
+    }
 }
