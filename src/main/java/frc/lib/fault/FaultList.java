@@ -26,7 +26,11 @@ public class FaultList extends ArrayList<Fault> {
     }
 
     public boolean hasFaults() {
-        return getCurrentFaultCount() > 0 | getStickyFaultCount() > 0;
+        return getCurrentFaultCount() > 0;
+    }
+
+    public boolean hasStickyFaults() {
+        return getStickyFaultCount() > 0;
     }
 
     /**
@@ -55,7 +59,7 @@ public class FaultList extends ArrayList<Fault> {
         boolean[] output = new boolean[array.length];
 
         for (int i = 0; i < array.length; i++) {
-            output[i] = array[i].get();
+            output[i] = !array[i].get(); //invert to make shuffleboard show red when there is a fault
         }
 
         return output;
@@ -67,7 +71,7 @@ public class FaultList extends ArrayList<Fault> {
         boolean[] output = new boolean[array.length];
 
         for (int i = 0; i < array.length; i++) {
-            output[i] = array[i].getSticky();
+            output[i] = !array[i].getSticky(); //invert to make shuffleboard show red when there is a fault
         }
 
         return output;

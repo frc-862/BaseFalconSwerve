@@ -25,9 +25,10 @@ public class FaultMonitor extends SubsystemBase {
     @Override
     public void periodic() {
         tab.addBooleanArray("PDH Current Faults", () -> FaultGrabber.grabPDH(pdh).currentToBooleanArray());
-        tab.addBooleanArray("PDH Current Faults", () -> FaultGrabber.grabPDH(pdh).currentToBooleanArray());
         tab.addBooleanArray("PDH Current Faults", () -> FaultGrabber.grabPDH(pdh).stickyToBooleanArray());
         tab.addBooleanArray("Rio Current Faults", () -> FaultGrabber.grabRio().currentToBooleanArray());
         tab.addBooleanArray("PDH Current Faults", () -> FaultGrabber.grabRio().stickyToBooleanArray());
+        tab.addBoolean("Has Faults", () -> !(FaultGrabber.grabPDH(pdh).hasFaults() || FaultGrabber.grabRio().hasFaults()));
+        tab.addBoolean("Has Sticky Faults", () -> !(FaultGrabber.grabPDH(pdh).hasStickyFaults() || FaultGrabber.grabRio().hasStickyFaults()));
     }
 }
