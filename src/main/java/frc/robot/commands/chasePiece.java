@@ -32,7 +32,7 @@ public class chasePiece extends CommandBase {
 	public void initialize() {
 		autoFactory.createManualTrajectory(AutonomousConstants.CUBE_CHASE_CONSTRAINTS,
 		new PathPoint(drivetrain.getPose().getTranslation(), drivetrain.getYaw()),
-		 new PathPoint(new Translation2d(0, 0), new Rotation2d(0,0)));
+		 new PathPoint(drivetrain.getPose().relativeTo(limelight.getTargetPoseRobotSpace().toPose2d()).getTranslation(), new Rotation2d(180,0)));
 		 // TODO: Get the Translation2d from the limelight compared to the drivetrain pose
 		 // Rotation2d should be 180 degrees since the starting position is facing the opposite direction, but not sure
 	}
