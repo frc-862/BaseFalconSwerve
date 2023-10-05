@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.I2C;
 
 
 public final class Constants {
@@ -56,8 +57,8 @@ public final class Constants {
         // i do remember noticing similar behavior when using phoenix 6 on HaD, so that does point me to it being the underlying cause
         public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(
             new Translation2d(DRIVETRAIN_WHEELBASE_METERS / 2.0, -DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
-            new Translation2d(-DRIVETRAIN_WHEELBASE_METERS / 2.0, -DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
             new Translation2d(DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
+            new Translation2d(-DRIVETRAIN_WHEELBASE_METERS / 2.0, -DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
             new Translation2d(-DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_TRACKWIDTH_METERS / 2.0)
         );
 
@@ -106,7 +107,7 @@ public final class Constants {
         public static final class CAN {
             // Pigeon IMU ID
             public static final int PIGEON = 23;
-            // Power distrobution hub ID
+            // Power distribution hub ID
             public static final int PDH = 21;
 
             // Front left CanIDs
