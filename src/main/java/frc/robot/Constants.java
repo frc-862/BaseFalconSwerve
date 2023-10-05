@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj.I2C;
 
 public final class Constants {
 
+    public static final String[] FAULT_IGNORE_LIST = {};
+
     public static final class ControllerConstants {
         // Ports for the controllers
         public static final int DRIVER_CONTROLLER_PORT = 0;

@@ -3,6 +3,8 @@ package frc.lib.fault;
 import java.util.function.BooleanSupplier;
 import java.util.function.IntSupplier;
 
+import frc.robot.Constants;
+
 public class Fault {
     private String name;
     private BooleanSupplier current;
@@ -51,12 +53,22 @@ public class Fault {
     }
 
     public boolean get() {
+        for (String faultName : Constants.FAULT_IGNORE_LIST) {
+            if (faultName.equals(name)) {
+                return false;
+            }
+        }
         return current.getAsBoolean();
     }
 
     public boolean getCurrent() {return get();};
 
     public boolean getSticky() {
+        for (String faultName : Constants.FAULT_IGNORE_LIST) {
+            if (faultName.equals(faultName)) {
+                return false;
+            }
+        }
         return sticky.getAsBoolean();
     }
 
