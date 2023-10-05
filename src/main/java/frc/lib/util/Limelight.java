@@ -246,14 +246,14 @@ public class Limelight {
      */
     private Pose3d toPose3d(double[] ntValues) {
         if (ntValues.length == 6){
-            return new Pose3d(new Translation3d(ntValues[0], ntValues[1], ntValues[2]), new Rotation3d(ntValues[3], ntValues[4], ntValues[5]));
+            return new Pose3d(new Translation3d(ntValues[0], ntValues[1], ntValues[2]), new Rotation3d(Math.toRadians(ntValues[3]), Math.toRadians(ntValues[4]), Math.toRadians(ntValues[5])));
         } else {
             return null;
         }
     }
 
     /**
-     * Automatically return either the blue or red alliance pose
+     * Automatically return either the blue or red alliance pose based on which alliance the driver station reports
      * @see Limelight#getBotPoseBlue()
      * @see Limelight#getBotPoseRed()
      * Robot transform is in field-space (alliance color driverstation WPILIB origin)
