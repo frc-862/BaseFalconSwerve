@@ -76,4 +76,24 @@ public class FaultList extends ArrayList<Fault> {
 
         return output;
     }
+
+    public String getCurrentFaults() {
+        String out = "";
+        for (Fault fault : this) {
+            if (fault.get()) {
+                out += fault.getName();
+            }
+        }
+        return out;
+    }
+
+    public String getStickyFaults() {
+        String out = "";
+        for (Fault fault : this) {
+            if (fault.getSticky()) {
+                out += fault.getName();
+            }
+        }
+        return out;
+    }
 }

@@ -6,12 +6,14 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.commands.TeleopSwerve;
+import frc.robot.subsystems.FaultMonitor;
 import frc.robot.subsystems.LimelightSubsystem;
 import frc.robot.subsystems.Swerve;
 
 public class RobotContainer {
     private static final Swerve drivetrain = new Swerve();
     private static final LimelightSubsystem limelight = new LimelightSubsystem();
+    private static final FaultMonitor FaultMonitor = new FaultMonitor();
 
     private static final XboxController driver = new XboxController(ControllerConstants.DRIVER_CONTROLLER_PORT);
 
