@@ -20,7 +20,7 @@ import frc.robot.subsystems.Swerve;
 public class RobotContainer {
     private static final Swerve drivetrain = new Swerve();
     private static final Limelight limelight = new Limelight("limelight");
-    private static final LimelightSubsystem limelight = new LimelightSubsystem();
+    private static final LimelightSubsystem limelightSub = new LimelightSubsystem();
     private static final FaultMonitor FaultMonitor = new FaultMonitor();
 
     private static final XboxController driver = new XboxController(ControllerConstants.DRIVER_CONTROLLER_PORT);
