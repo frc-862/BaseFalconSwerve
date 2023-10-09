@@ -167,7 +167,6 @@ public  class FaultGrabber {
     public FaultList grabSparkMax(CANSparkMax sparkmax) {
         FaultList faults = new FaultList();
 
-
         faults.add(new Fault("Brownout", () -> sparkmax.getFault(FaultID.kBrownout), () -> sparkmax.getStickyFault(FaultID.kBrownout)));
         faults.add(new Fault("CANRX", () -> sparkmax.getFault(FaultID.kCANRX), () -> sparkmax.getStickyFault(FaultID.kCANRX)));
         faults.add(new Fault("CANTX", () -> sparkmax.getFault(FaultID.kCANTX), () -> sparkmax.getStickyFault(FaultID.kCANTX)));
