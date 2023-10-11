@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj.I2C;
 
 public final class Constants {
 
+    public static final String[] FAULT_IGNORE_LIST = {};
+
     public static final class ControllerConstants {
         // Ports for the controllers
         public static final int DRIVER_CONTROLLER_PORT = 0;
@@ -107,7 +109,7 @@ public final class Constants {
         public static final class CAN {
             // Pigeon IMU ID
             public static final int PIGEON = 23;
-            // Power distrobution hub ID
+            // Power distribution hub ID
             public static final int PDH = 21;
 
             // Front left CanIDs

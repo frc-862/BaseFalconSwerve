@@ -26,7 +26,11 @@ public class FaultList extends ArrayList<Fault> {
     }
 
     public boolean hasFaults() {
-        return getCurrentFaultCount() > 0 | getStickyFaultCount() > 0;
+        return getCurrentFaultCount() > 0;
+    }
+
+    public boolean hasStickyFaults() {
+        return getStickyFaultCount() > 0;
     }
 
     /**
@@ -47,5 +51,49 @@ public class FaultList extends ArrayList<Fault> {
      */
     public void merge(FaultList other) {
         this.addAll(other);
+    }
+
+    public boolean[] currentToBooleanArray() {
+        Fault[] array = new Fault[this.size()];
+        array = this.toArray(array);
+        boolean[] output = new boolean[array.length];
+
+        for (int i = 0; i < array.length; i++) {
+            output[i] = !array[i].get(); //invert to make shuffleboard show red when there is a fault
+        }
+
+        return output;
+    }
+
+    public boolean[] stickyToBooleanArray() {
+        Fault[] array = new Fault[this.size()];
+        array = this.toArray(array);
+        boolean[] output = new boolean[array.length];
+
+        for (int i = 0; i < array.length; i++) {
+            output[i] = !array[i].getSticky(); //invert to make shuffleboard show red when there is a fault
+        }
+
+        return output;
+    }
+
+    public String getCurrentFaults() {
+        String out = "";
+        for (Fault fault : this) {
+            if (fault.get()) {
+                out += fault.getName();
+            }
+        }
+        return out;
+    }
+
+    public String getStickyFaults() {
+        String out = "";
+        for (Fault fault : this) {
+            if (fault.getSticky()) {
+                out += fault.getName();
+            }
+        }
+        return out;
     }
 }
