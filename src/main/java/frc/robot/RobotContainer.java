@@ -44,5 +44,5 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(new TeleopSwerve(drivetrain, () -> driver.getLeftY(), () -> driver.getLeftX(), () -> driver.getRightX(), () -> (driver.getRightTriggerAxis() > 0.75)));
     }
 
-    public Command getAutonomousCommand() { return null;}
+    public Command getAutonomousCommand() { return autoFactory}
 }
