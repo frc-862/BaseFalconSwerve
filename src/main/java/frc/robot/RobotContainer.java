@@ -47,7 +47,15 @@ public class RobotContainer {
     }
 
     private void configureAutonomousCommands(){
-        autoFactory.makeTrajectory("B2[1]-M-C-HIGH", new HashMap<>(), 
+        autoFactory.makeTrajectory("1-Meter-Back", new HashMap<>(), 
+            new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
+        autoFactory.makeTrajectory("1-Meter-Forward", new HashMap<>(), 
+            new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
+        autoFactory.makeTrajectory("1-Meter-Left", new HashMap<>(), 
+            new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
+        autoFactory.makeTrajectory("1-Meter-Right", new HashMap<>(), 
+            new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
+        autoFactory.makeTrajectory("Square", new HashMap<>(), 
             new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
         
     }
