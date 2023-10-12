@@ -37,8 +37,6 @@ public class RobotContainer {
 
     private void configureBindings() {
         new Trigger(driver::getXButton).whileTrue(new InstantCommand(drivetrain::park, drivetrain));
-        new Trigger(driver::getAButton).whileTrue(new chasePiece(limelight, autoFactory, drivetrain));
-        new Trigger(driver::getBButton).onTrue(new InstantCommand(() -> autoFactory.createManualTrajectory(AutonomousConstants.CUBE_CHASE_CONSTRAINTS,new PathPoint(drivetrain.getPose().getTranslation(), drivetrain.getYaw()), new PathPoint(new Translation2d(0, 0), new Rotation2d(0,0)))));
     }
 
     private void configureDefaultCommands() {
