@@ -16,6 +16,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -107,7 +108,7 @@ public class Swerve extends SubsystemBase {
                 fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
                                     translation.getX(), 
                                     translation.getY(), 
-                                    rotation, 
+                                    -rotation, 
                                     getYaw()
                                 )
                                 : new ChassisSpeeds(
@@ -168,7 +169,6 @@ public class Swerve extends SubsystemBase {
     }
 
     public Rotation2d getYaw() {
-        // return gyro.getRotation2d(); //there used to be a invert gyro thingy here but I think phoenix 6 removes the need for that
         return Rotation2d.fromDegrees(gyro.getYaw().getValue());
     }
 
@@ -204,6 +204,8 @@ public class Swerve extends SubsystemBase {
         SmartDashboard.putData("field", field);
         SmartDashboard.putData("visionField", visionField);
         SmartDashboard.putData("odoField", odoField);
+
+        SmartDashboard.putNumber("yaw", getYaw().getDegrees());
 
         for(SwerveModule mod : mSwerveMods){
             // SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
