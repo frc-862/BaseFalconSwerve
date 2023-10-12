@@ -158,5 +158,8 @@ public final class Constants {
         public static final PIDConstants POSE_PID_CONSTANTS = new PIDConstants(0, 0, 0); // X and Y position PID
 
         public static final PathConstraints CUBE_CHASE_CONSTRAINTS = new PathConstraints(2, 2); // TODO TEST FOR MAX 
+    
+        public static final double MAX_VELOCITY = 2;
+        public static final double MAX_ACCELERATION = 1;
     }
 }

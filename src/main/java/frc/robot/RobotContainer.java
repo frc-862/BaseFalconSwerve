@@ -1,5 +1,6 @@
 package frc.robot;
 
+import java.util.HashMap;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.XboxController;
@@ -7,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.auto.AutonomousCommandFactory;
+import frc.lib.pathplanner.com.pathplanner.lib.PathConstraints;
 import frc.lib.pathplanner.com.pathplanner.lib.PathPoint;
 import frc.lib.util.Limelight;
 import frc.robot.Constants.AutonomousConstants;
@@ -44,5 +46,15 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(new TeleopSwerve(drivetrain, () -> driver.getLeftY(), () -> driver.getLeftX(), () -> driver.getRightX(), () -> (driver.getRightTriggerAxis() > 0.75)));
     }
 
-    public Command getAutonomousCommand() { return autoFactory}
+    private void configureAutonomousCommands(){
+        autoFactory.makeTrajectory("B2[1]-M-C-HIGH", new HashMap<>(), 
+            new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
+        
+    }
+
+    protected AutonomousCommandFactory getCommandFactory(){
+        return autoFactory;
+    }
+
+    public Command getAutonomousCommand() { return null;}
 }
