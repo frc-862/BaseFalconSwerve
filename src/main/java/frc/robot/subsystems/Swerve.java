@@ -108,7 +108,7 @@ public class Swerve extends SubsystemBase {
                 fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
                                     translation.getX(), 
                                     translation.getY(), 
-                                    rotation, 
+                                    -rotation, 
                                     getYaw()
                                 )
                                 : new ChassisSpeeds(
@@ -169,7 +169,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public Rotation2d getYaw() {
-        return Rotation2d.fromDegrees(-gyro.getYaw().getValue());
+        return Rotation2d.fromDegrees(gyro.getYaw().getValue());
     }
 
     /**
@@ -195,6 +195,8 @@ public class Swerve extends SubsystemBase {
         SmartDashboard.putData("field", field);
         SmartDashboard.putData("visionField", visionField);
         SmartDashboard.putData("odoField", odoField);
+
+        SmartDashboard.putNumber("yaw", getYaw().getDegrees());
 
         for(SwerveModule mod : mSwerveMods){
             // SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
