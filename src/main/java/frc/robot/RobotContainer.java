@@ -31,6 +31,7 @@ public class RobotContainer {
     private static final AutonomousCommandFactory autoFactory = new AutonomousCommandFactory(drivetrain::getPose, drivetrain::resetOdometry, drivetrain.getDriveKinematics(),
             AutonomousConstants.DRIVE_PID_CONSTANTS, AutonomousConstants.THETA_PID_CONSTANTS, AutonomousConstants.POSE_PID_CONSTANTS, drivetrain::setModuleStates, drivetrain);
             
+    
     public RobotContainer() {
 
         // Configure the trigger bindings
@@ -63,6 +64,4 @@ public class RobotContainer {
     protected AutonomousCommandFactory getCommandFactory(){
         return autoFactory;
     }
-
-    public Command getAutonomousCommand() { return null;}
 }
