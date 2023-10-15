@@ -8,6 +8,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.I2C;
+import frc.thunder.pathplanner.com.pathplanner.lib.PathConstraints;
+import frc.thunder.pathplanner.com.pathplanner.lib.auto.PIDConstants;
 
 
 public final class Constants {
@@ -140,4 +142,16 @@ public final class Constants {
             public final static String CANCODER = "Canivore";
         }
     }
+
+    public static final class AutonomousConstants {
+        public static final PIDConstants DRIVE_PID_CONSTANTS = new PIDConstants(2.5, 0, 0); // Drive velocity PID 10.5
+        public static final PIDConstants THETA_PID_CONSTANTS = new PIDConstants(4, 0, 0); // Rotation PID 7
+        public static final PIDConstants POSE_PID_CONSTANTS = new PIDConstants(0, 0, 0); // X and Y position PID
+
+        public static final PathConstraints CUBE_CHASE_CONSTRAINTS = new PathConstraints(2, 2); // TODO TEST FOR MAX 
+    
+        public static final double MAX_VELOCITY = 2;
+        public static final double MAX_ACCELERATION = 1;
+    }
+    
 }
