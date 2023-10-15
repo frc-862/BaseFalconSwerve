@@ -22,17 +22,12 @@
       "/SmartDashboard/visionField": "Field2d"
     },
     "windows": {
+      "/Shuffleboard/Autonomous/Auto Mode": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/field": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/odoField": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/visionField": {
         "window": {
           "visible": true
         }
@@ -54,5 +49,8 @@
         "open": true
       }
     }
+  },
+  "NetworkTables View": {
+    "visible": false
   }
 }
