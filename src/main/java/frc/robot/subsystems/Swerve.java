@@ -1,6 +1,9 @@
 package frc.robot.subsystems;
 
+import frc.robot.GyroSim;
+import frc.robot.Robot;
 import frc.robot.SwerveModule;
+import frc.robot.SwerveModuleSim;
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Constants.RobotMap;
 import frc.robot.Constants.VisionConstants;
@@ -10,6 +13,7 @@ import frc.thunder.util.Pose4d;
 import frc.robot.Constants.DrivetrainConstants.Offsets;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
@@ -22,6 +26,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -37,6 +42,7 @@ public class Swerve extends SubsystemBase {
     private Field2d odoField = new Field2d();
 
     public Pigeon2 gyro;
+    private GyroSim gyroSim;
 
     private Limelight limelight;
 
@@ -45,47 +51,95 @@ public class Swerve extends SubsystemBase {
         gyro.getConfigurator().apply(new Pigeon2Configuration());
         zeroGyro();
 
+        gyroSim = new GyroSim();
+
         //this can be compacted significantly, but this is what you have to do to make it work with our existing constants
-    mSwerveMods = new SwerveModule[] {
-        new SwerveModule(
-            0,
-            new SwerveModuleConstants(
-                RobotMap.CAN.FRONT_LEFT_DRIVE_MOTOR,
-                RobotMap.CAN.FRONT_LEFT_AZIMUTH_MOTOR,
-                RobotMap.CAN.FRONT_LEFT_CANCODER,
-                RobotMap.BUS.DRIVE,
-                RobotMap.BUS.AZIMUTH,
-                RobotMap.BUS.CANCODER,
-                Rotation2d.fromRotations(Offsets.FRONT_LEFT_STEER_OFFSET))),
-        new SwerveModule(
-            1,
-            new SwerveModuleConstants(
-                RobotMap.CAN.FRONT_RIGHT_DRIVE_MOTOR,
-                RobotMap.CAN.FRONT_RIGHT_AZIMUTH_MOTOR,
-                RobotMap.CAN.FRONT_RIGHT_CANCODER,
-                RobotMap.BUS.DRIVE,
-                RobotMap.BUS.AZIMUTH,
-                RobotMap.BUS.CANCODER,
-                Rotation2d.fromRotations(Offsets.FRONT_RIGHT_STEER_OFFSET))),
-        new SwerveModule(2,
-            new SwerveModuleConstants(
-                RobotMap.CAN.BACK_LEFT_DRIVE_MOTOR,
-                RobotMap.CAN.BACK_LEFT_AZIMUTH_MOTOR,
-                RobotMap.CAN.BACK_LEFT_CANCODER,
-                RobotMap.BUS.DRIVE,
-                RobotMap.BUS.AZIMUTH,
-                RobotMap.BUS.CANCODER,
-                Rotation2d.fromRotations(Offsets.BACK_LEFT_STEER_OFFSET))),
-        new SwerveModule(3,
-            new SwerveModuleConstants(
-                RobotMap.CAN.BACK_RIGHT_DRIVE_MOTOR,
-                RobotMap.CAN.BACK_RIGHT_AZIMUTH_MOTOR,
-                RobotMap.CAN.BACK_RIGHT_CANCODER,
-                RobotMap.BUS.DRIVE,
-                RobotMap.BUS.AZIMUTH,
-                RobotMap.BUS.CANCODER,
-                Rotation2d.fromRotations(Offsets.BACK_RIGHT_STEER_OFFSET)))
-        };
+
+        if(Robot.isSimulation())  {
+            mSwerveMods = new SwerveModuleSim[] {
+                new SwerveModuleSim(
+                    0,
+                    new SwerveModuleConstants(
+                        RobotMap.CAN.FRONT_LEFT_DRIVE_MOTOR,
+                        RobotMap.CAN.FRONT_LEFT_AZIMUTH_MOTOR,
+                        RobotMap.CAN.FRONT_LEFT_CANCODER,
+                        RobotMap.BUS.DRIVE,
+                        RobotMap.BUS.AZIMUTH,
+                        RobotMap.BUS.CANCODER,
+                        Rotation2d.fromRotations(Offsets.FRONT_LEFT_STEER_OFFSET))),
+                new SwerveModuleSim(
+                    1,
+                    new SwerveModuleConstants(
+                        RobotMap.CAN.FRONT_RIGHT_DRIVE_MOTOR,
+                        RobotMap.CAN.FRONT_RIGHT_AZIMUTH_MOTOR,
+                        RobotMap.CAN.FRONT_RIGHT_CANCODER,
+                        RobotMap.BUS.DRIVE,
+                        RobotMap.BUS.AZIMUTH,
+                        RobotMap.BUS.CANCODER,
+                        Rotation2d.fromRotations(Offsets.FRONT_RIGHT_STEER_OFFSET))),
+                new SwerveModuleSim(2,
+                    new SwerveModuleConstants(
+                        RobotMap.CAN.BACK_LEFT_DRIVE_MOTOR,
+                        RobotMap.CAN.BACK_LEFT_AZIMUTH_MOTOR,
+                        RobotMap.CAN.BACK_LEFT_CANCODER,
+                        RobotMap.BUS.DRIVE,
+                        RobotMap.BUS.AZIMUTH,
+                        RobotMap.BUS.CANCODER,
+                        Rotation2d.fromRotations(Offsets.BACK_LEFT_STEER_OFFSET))),
+                new SwerveModuleSim(3,
+                    new SwerveModuleConstants(
+                        RobotMap.CAN.BACK_RIGHT_DRIVE_MOTOR,
+                        RobotMap.CAN.BACK_RIGHT_AZIMUTH_MOTOR,
+                        RobotMap.CAN.BACK_RIGHT_CANCODER,
+                        RobotMap.BUS.DRIVE,
+                        RobotMap.BUS.AZIMUTH,
+                        RobotMap.BUS.CANCODER,
+                        Rotation2d.fromRotations(Offsets.BACK_RIGHT_STEER_OFFSET)))
+                };
+        } else {
+            mSwerveMods = new SwerveModule[] {
+                new SwerveModule(
+                    0,
+                    new SwerveModuleConstants(
+                        RobotMap.CAN.FRONT_LEFT_DRIVE_MOTOR,
+                        RobotMap.CAN.FRONT_LEFT_AZIMUTH_MOTOR,
+                        RobotMap.CAN.FRONT_LEFT_CANCODER,
+                        RobotMap.BUS.DRIVE,
+                        RobotMap.BUS.AZIMUTH,
+                        RobotMap.BUS.CANCODER,
+                        Rotation2d.fromRotations(Offsets.FRONT_LEFT_STEER_OFFSET))),
+                new SwerveModule(
+                    1,
+                    new SwerveModuleConstants(
+                        RobotMap.CAN.FRONT_RIGHT_DRIVE_MOTOR,
+                        RobotMap.CAN.FRONT_RIGHT_AZIMUTH_MOTOR,
+                        RobotMap.CAN.FRONT_RIGHT_CANCODER,
+                        RobotMap.BUS.DRIVE,
+                        RobotMap.BUS.AZIMUTH,
+                        RobotMap.BUS.CANCODER,
+                        Rotation2d.fromRotations(Offsets.FRONT_RIGHT_STEER_OFFSET))),
+                new SwerveModule(2,
+                    new SwerveModuleConstants(
+                        RobotMap.CAN.BACK_LEFT_DRIVE_MOTOR,
+                        RobotMap.CAN.BACK_LEFT_AZIMUTH_MOTOR,
+                        RobotMap.CAN.BACK_LEFT_CANCODER,
+                        RobotMap.BUS.DRIVE,
+                        RobotMap.BUS.AZIMUTH,
+                        RobotMap.BUS.CANCODER,
+                        Rotation2d.fromRotations(Offsets.BACK_LEFT_STEER_OFFSET))),
+                new SwerveModule(3,
+                    new SwerveModuleConstants(
+                        RobotMap.CAN.BACK_RIGHT_DRIVE_MOTOR,
+                        RobotMap.CAN.BACK_RIGHT_AZIMUTH_MOTOR,
+                        RobotMap.CAN.BACK_RIGHT_CANCODER,
+                        RobotMap.BUS.DRIVE,
+                        RobotMap.BUS.AZIMUTH,
+                        RobotMap.BUS.CANCODER,
+                        Rotation2d.fromRotations(Offsets.BACK_RIGHT_STEER_OFFSET)))
+                };
+
+                
+            }
  
         /* By pausing init for a second before setting module offsets, we avoid a bug with inverting motors.
          * See https://github.com/Team364/BaseFalconSwerve/issues/8 for more info.
@@ -168,7 +222,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public Rotation2d getYaw() {
-        return Rotation2d.fromDegrees(gyro.getYaw().getValue());
+        return Robot.isReal() ? Rotation2d.fromDegrees(gyro.getYaw().getValue()) : gyroSim.getYaw();
     }
 
     /**
@@ -196,6 +250,11 @@ public class Swerve extends SubsystemBase {
             poseEstimator.addVisionMeasurement(pose.toPose2d(), Timer.getFPGATimestamp() - Units.millisecondsToSeconds(pose.getLatency()) - VisionConstants.PROCESS_LATENCY);
         }
 
+        if(Robot.isSimulation()){
+            // odometry.update(getModulePositions());
+            gyroSim.update(getDriveKinematics().toChassisSpeeds(getModuleStates()).omegaRadiansPerSecond, 0.02);
+        }
+
         field.setRobotPose(getPose());
         visionField.setRobotPose(pose.getX(), pose.getY(), pose.getRotation().toRotation2d());
         odoField.setRobotPose(swerveodo.getEstimatedPosition());
@@ -208,9 +267,12 @@ public class Swerve extends SubsystemBase {
 
         for(SwerveModule mod : mSwerveMods){
             // SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder (raw)", mod.getCanCoderRaw());
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Integrated", mod.getAngleRaw());
+            // SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder (raw)", mod.getCanCoderRaw());
+            // SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Integrated", mod.getAngleRaw());
             // SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);    
         }
+
+        
     }
+    
 }

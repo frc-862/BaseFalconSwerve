@@ -1,0 +1,58 @@
+{
+  "HALProvider": {
+    "Other Devices": {
+      "Talon FX (Pro)[7]": {
+        "header": {
+          "open": true
+        }
+      },
+      "Talon FX (Pro)[7]/Fwd Limit": {
+        "header": {
+          "open": true
+        }
+      }
+    }
+  },
+  "NTProvider": {
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/Shuffleboard/Autonomous/Auto Mode": "String Chooser",
+      "/SmartDashboard/field": "Field2d",
+      "/SmartDashboard/odoField": "Field2d",
+      "/SmartDashboard/visionField": "Field2d"
+    },
+    "windows": {
+      "/SmartDashboard/field": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/odoField": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/visionField": {
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables": {
+    "transitory": {
+      "Shuffleboard": {
+        "open": true
+      },
+      "SmartDashboard": {
+        "field": {
+          "open": true
+        },
+        "odoField": {
+          "open": true
+        },
+        "open": true
+      }
+    }
+  }
+}
