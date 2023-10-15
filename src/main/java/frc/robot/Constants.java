@@ -91,10 +91,6 @@ public final class Constants {
         // Steer offsets for our modules
         public static final class Offsets {
             // swerve module absolute encoder offsets
-                // public static final double FRONT_LEFT_STEER_OFFSET  = -0.224609;
-                // public static final double FRONT_RIGHT_STEER_OFFSET = -0.116699;
-                // public static final double BACK_LEFT_STEER_OFFSET   = 0.132812;
-                // public static final double BACK_RIGHT_STEER_OFFSET  = 0.322754;
                 public static final double FRONT_LEFT_STEER_OFFSET  = 0.224609;
                 public static final double FRONT_RIGHT_STEER_OFFSET = 0.116699;
                 public static final double BACK_LEFT_STEER_OFFSET   = -0.132812;
