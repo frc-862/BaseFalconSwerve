@@ -15,6 +15,8 @@ public class RobotContainer {
     private static final LimelightSubsystem limelight = new LimelightSubsystem();
     private static final FaultMonitor FaultMonitor = new FaultMonitor();
 
+    
+
     private static final XboxController driver = new XboxController(ControllerConstants.DRIVER_CONTROLLER_PORT);
 
     public RobotContainer() {
@@ -31,7 +33,7 @@ public class RobotContainer {
     }
 
     private void configureDefaultCommands() {
-        drivetrain.setDefaultCommand(new TeleopSwerve(drivetrain, () -> driver.getLeftY()*0.3, () -> -driver.getLeftX()*0.3, () -> -driver.getRightX()*0.3, () -> (driver.getRightTriggerAxis() > 0.75)));
+        drivetrain.setDefaultCommand(new TeleopSwerve(drivetrain, () -> driver.getLeftY(), () -> driver.getLeftX(), () -> driver.getRightX(), () -> (driver.getRightTriggerAxis() > 0.75)));
     }
 
     public Command getAutonomousCommand() { return null;}

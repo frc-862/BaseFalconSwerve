@@ -49,7 +49,7 @@ public final class Constants {
         public static final double WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_DIAMETER;
         public static final double ANGLE_RATIO = 150/7;
 
-        public static final InvertedValue ANGLE_INVERT = InvertedValue.CounterClockwise_Positive;
+        public static final InvertedValue ANGLE_INVERT = InvertedValue.Clockwise_Positive;
         public static final InvertedValue DRIVE_INVERT = InvertedValue.Clockwise_Positive;
 
         public static final NeutralModeValue ANGLE_NEUTRAL = NeutralModeValue.Brake;
@@ -58,10 +58,10 @@ public final class Constants {
         // i swapped the left and right negations here in order to fix an issue with turn motors being oriented like an X instead of a diamond. There is likely some underlying cause that should be addressed, perhaps something to do with sensor inverts, or some other novel phoenix 6 thing
         // i do remember noticing similar behavior when using phoenix 6 on HaD, so that does point me to it being the underlying cause
         public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(
-            new Translation2d(DRIVETRAIN_WHEELBASE_METERS / 2.0, -DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
             new Translation2d(DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
-            new Translation2d(-DRIVETRAIN_WHEELBASE_METERS / 2.0, -DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
-            new Translation2d(-DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_TRACKWIDTH_METERS / 2.0)
+            new Translation2d(DRIVETRAIN_WHEELBASE_METERS / 2.0, -DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
+            new Translation2d(-DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
+            new Translation2d(-DRIVETRAIN_WHEELBASE_METERS / 2.0, -DRIVETRAIN_TRACKWIDTH_METERS / 2.0)
         );
 
         public static final Rotation2d FRONT_LEFT_RESTING_ANGLE = Rotation2d.fromDegrees(-45d);
@@ -91,10 +91,10 @@ public final class Constants {
         // Steer offsets for our modules
         public static final class Offsets {
             // swerve module absolute encoder offsets
-                public static final double FRONT_LEFT_STEER_OFFSET  = -0.224609;
-                public static final double FRONT_RIGHT_STEER_OFFSET = -0.116699;
-                public static final double BACK_LEFT_STEER_OFFSET   = 0.132812;
-                public static final double BACK_RIGHT_STEER_OFFSET  = 0.322754;
+                public static final double FRONT_LEFT_STEER_OFFSET  = 0.224609;
+                public static final double FRONT_RIGHT_STEER_OFFSET = 0.116699;
+                public static final double BACK_LEFT_STEER_OFFSET   = -0.132812;
+                public static final double BACK_RIGHT_STEER_OFFSET  = -0.322754;
         }
     }
 
