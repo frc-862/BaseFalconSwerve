@@ -7,10 +7,10 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.util.Limelight;
-import frc.lib.util.Limelight.CamMode;
-import frc.lib.util.Limelight.LEDMode;
-import frc.lib.util.Limelight.StreamMode;
+import frc.thunder.vision.Limelight;
+import frc.thunder.vision.Limelight.CamMode;
+import frc.thunder.vision.Limelight.LEDMode;
+import frc.thunder.vision.Limelight.StreamMode;
 
 public class LimelightSubsystem extends SubsystemBase {
     private Limelight limelight;

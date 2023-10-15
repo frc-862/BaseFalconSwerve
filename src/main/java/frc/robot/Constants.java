@@ -10,6 +10,8 @@ import edu.wpi.first.math.util.Units;
 import frc.lib.auto.PIDConstants;
 import frc.lib.pathplanner.com.pathplanner.lib.PathConstraints;
 import edu.wpi.first.wpilibj.I2C;
+import frc.thunder.pathplanner.com.pathplanner.lib.PathConstraints;
+import frc.thunder.pathplanner.com.pathplanner.lib.auto.PIDConstants;
 
 
 public final class Constants {
@@ -52,7 +54,7 @@ public final class Constants {
         public static final double ANGLE_RATIO = 150/7;
 
         public static final InvertedValue ANGLE_INVERT = InvertedValue.Clockwise_Positive;
-        public static final InvertedValue DRIVE_INVERT = InvertedValue.CounterClockwise_Positive;
+        public static final InvertedValue DRIVE_INVERT = InvertedValue.Clockwise_Positive;
 
         public static final NeutralModeValue ANGLE_NEUTRAL = NeutralModeValue.Brake;
         public static final NeutralModeValue DRIVE_NEUTRAL = NeutralModeValue.Brake;
@@ -60,11 +62,6 @@ public final class Constants {
         // i swapped the left and right negations here in order to fix an issue with turn motors being oriented like an X instead of a diamond. There is likely some underlying cause that should be addressed, perhaps something to do with sensor inverts, or some other novel phoenix 6 thing
         // i do remember noticing similar behavior when using phoenix 6 on HaD, so that does point me to it being the underlying cause
         public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(
-            // new Translation2d(DRIVETRAIN_WHEELBASE_METERS / 2.0, -DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
-            // new Translation2d(DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
-            // new Translation2d(-DRIVETRAIN_WHEELBASE_METERS / 2.0, -DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
-            // new Translation2d(-DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_TRACKWIDTH_METERS / 2.0)
-
             new Translation2d(DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
             new Translation2d(DRIVETRAIN_WHEELBASE_METERS / 2.0, -DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
             new Translation2d(-DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
@@ -98,10 +95,6 @@ public final class Constants {
         // Steer offsets for our modules
         public static final class Offsets {
             // swerve module absolute encoder offsets
-                // public static final double FRONT_LEFT_STEER_OFFSET  = -0.224609;
-                // public static final double FRONT_RIGHT_STEER_OFFSET = -0.116699;
-                // public static final double BACK_LEFT_STEER_OFFSET   = 0.132812;
-                // public static final double BACK_RIGHT_STEER_OFFSET  = 0.322754;
                 public static final double FRONT_LEFT_STEER_OFFSET  = 0.224609;
                 public static final double FRONT_RIGHT_STEER_OFFSET = 0.116699;
                 public static final double BACK_LEFT_STEER_OFFSET   = -0.132812;
@@ -150,16 +143,5 @@ public final class Constants {
 
             public final static String CANCODER = "Canivore";
         }
-    }
-
-    public static final class AutonomousConstants {
-        public static final PIDConstants DRIVE_PID_CONSTANTS = new PIDConstants(2.5, 0, 0); // Drive velocity PID 10.5
-        public static final PIDConstants THETA_PID_CONSTANTS = new PIDConstants(4, 0, 0); // Rotation PID 7
-        public static final PIDConstants POSE_PID_CONSTANTS = new PIDConstants(0, 0, 0); // X and Y position PID
-
-        public static final PathConstraints CUBE_CHASE_CONSTRAINTS = new PathConstraints(2, 2); // TODO TEST FOR MAX 
-    
-        public static final double MAX_VELOCITY = 2;
-        public static final double MAX_ACCELERATION = 1;
     }
 }
