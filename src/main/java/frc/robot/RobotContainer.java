@@ -40,7 +40,8 @@ public class RobotContainer extends LightningContainer {
         drivetrain.setDefaultCommand(new TeleopSwerve(drivetrain, () -> driver.getLeftY(), () -> driver.getLeftX(), () -> driver.getRightX(), () -> (driver.getRightTriggerAxis() > 0.75)));
     }
 
-    private void configureAutonomousCommands(){
+    @Override
+    protected void configureAutonomousCommands(){
         autoFactory.makeTrajectory("1-Meter-Back", new HashMap<>(), 
             new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
         autoFactory.makeTrajectory("1-Meter-Forward", new HashMap<>(), 
@@ -57,8 +58,6 @@ public class RobotContainer extends LightningContainer {
     protected AutonomousCommandFactory getCommandFactory(){
         return autoFactory;
     }
-    @Override
-    protected void configureAutonomousCommands() {}
     
     @Override
     protected void releaseDefaultCommands() {}
