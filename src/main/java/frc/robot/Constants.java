@@ -7,7 +7,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.I2C;
 import frc.thunder.pathplanner.com.pathplanner.lib.PathConstraints;
 import frc.thunder.pathplanner.com.pathplanner.lib.auto.PIDConstants;
 
@@ -153,5 +152,4 @@ public final class Constants {
         public static final double MAX_VELOCITY = 2;
         public static final double MAX_ACCELERATION = 1;
     }
-    
 }
