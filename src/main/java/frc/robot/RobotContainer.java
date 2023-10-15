@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.auto.Autonomous;
 import frc.lib.auto.AutonomousCommandFactory;
 import frc.lib.pathplanner.com.pathplanner.lib.PathConstraints;
 import frc.lib.pathplanner.com.pathplanner.lib.PathPoint;
@@ -58,7 +59,7 @@ public class RobotContainer {
             new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
         autoFactory.makeTrajectory("Square", new HashMap<>(), 
             new PathConstraints(AutonomousConstants.MAX_VELOCITY, AutonomousConstants.MAX_ACCELERATION));
-        
+        Autonomous.register("FORCE", new InstantCommand(() -> drivetrain.drive(new Translation2d(0, 0), 0, true, false)));
     }
 
     protected AutonomousCommandFactory getCommandFactory(){
