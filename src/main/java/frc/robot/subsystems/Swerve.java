@@ -31,7 +31,7 @@ public class Swerve extends SubsystemBase {
     public SwerveModule[] mSwerveMods;
     public SwerveDrivePoseEstimator poseEstimator;
     public SwerveDrivePoseEstimator swerveodo;
-    private Pose4d visionPose = new Pose4d(-1, -1, -1, -1, -1, -1, -1); // TODO see if we can not declare here like before
+    private Pose4d visionPose; // TODO see if we can not declare here like before
     private Field2d field = new Field2d();
     private Field2d visionField = new Field2d();
     private Field2d odoField = new Field2d();
@@ -128,10 +128,18 @@ public class Swerve extends SubsystemBase {
         }
     }
 
-    public Pose2d getVisionPose() {
+    /**
+     * Get Pose estimator pose
+     * @return pose2d (x,y)
+     */
+    public Pose2d getPose() {
         return poseEstimator.getEstimatedPosition();
     }
 
+    /**
+     * Sets poseEstimator position to given: (x, y), and gyro heading
+     * @param pose pose2d, (x, y)
+     */
     public void resetOdometry(Pose2d pose) {
         poseEstimator.resetPosition(getYaw(), getModulePositions(), pose);
     }
@@ -156,6 +164,10 @@ public class Swerve extends SubsystemBase {
         gyro.setYaw(0);
     }
 
+    /**
+     * 
+     * @return Rotation 2d from gyro
+     */
     public Rotation2d getYaw() {
         return Rotation2d.fromDegrees(gyro.getYaw().getValue());
     }
@@ -178,19 +190,19 @@ public class Swerve extends SubsystemBase {
 
     @Override
     public void periodic() {
+        // Update pose Estimator
         poseEstimator.updateWithTime(Timer.getFPGATimestamp(), getYaw(), getModulePositions());
         swerveodo.updateWithTime(Timer.getFPGATimestamp(), getYaw(), getModulePositions());
         visionPose = limelight.getAlliancePose();
         if (trustVision()) {
             poseEstimator.addVisionMeasurement(visionPose.toPose2d(),
-                    Timer.getFPGATimestamp() - Units.millisecondsToSeconds(visionPose.getLatency())
-                            - VisionConstants.PROCESS_LATENCY);
+                Timer.getFPGATimestamp() - Units.millisecondsToSeconds(visionPose.getLatency()) - VisionConstants.PROCESS_LATENCY);
         }
 
-        field.setRobotPose(getVisionPose());
+        //Shuffleboard pose drawings
+        field.setRobotPose(getPose());
         if (visionPose != null) {
-            visionField.setRobotPose(visionPose.getX(), visionPose.getY(),
-                    visionPose.getRotation().toRotation2d());
+            visionField.setRobotPose(visionPose.getX(), visionPose.getY(), visionPose.getRotation().toRotation2d());
         }
         odoField.setRobotPose(swerveodo.getEstimatedPosition());
 
