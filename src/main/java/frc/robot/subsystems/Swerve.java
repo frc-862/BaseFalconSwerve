@@ -31,7 +31,7 @@ public class Swerve extends SubsystemBase {
     public SwerveModule[] mSwerveMods;
     public SwerveDrivePoseEstimator poseEstimator;
     public SwerveDrivePoseEstimator swerveodo;
-    private Pose4d pose = new Pose4d(-1, -1, -1, -1, -1, -1,-1);
+    private Pose4d visionPose = new Pose4d(-1, -1, -1, -1, -1, -1, -1); // TODO see if we can not declare here like before
     private Field2d field = new Field2d();
     private Field2d visionField = new Field2d();
     private Field2d odoField = new Field2d();
@@ -45,107 +45,90 @@ public class Swerve extends SubsystemBase {
         gyro.getConfigurator().apply(new Pigeon2Configuration());
         zeroGyro();
 
-        //this can be compacted significantly, but this is what you have to do to make it work with our existing constants
-    mSwerveMods = new SwerveModule[] {
-        new SwerveModule(
-            0,
-            new SwerveModuleConstants(
-                RobotMap.CAN.FRONT_LEFT_DRIVE_MOTOR,
-                RobotMap.CAN.FRONT_LEFT_AZIMUTH_MOTOR,
-                RobotMap.CAN.FRONT_LEFT_CANCODER,
-                RobotMap.BUS.DRIVE,
-                RobotMap.BUS.AZIMUTH,
-                RobotMap.BUS.CANCODER,
-                Rotation2d.fromRotations(Offsets.FRONT_LEFT_STEER_OFFSET))),
-        new SwerveModule(
-            1,
-            new SwerveModuleConstants(
-                RobotMap.CAN.FRONT_RIGHT_DRIVE_MOTOR,
-                RobotMap.CAN.FRONT_RIGHT_AZIMUTH_MOTOR,
-                RobotMap.CAN.FRONT_RIGHT_CANCODER,
-                RobotMap.BUS.DRIVE,
-                RobotMap.BUS.AZIMUTH,
-                RobotMap.BUS.CANCODER,
-                Rotation2d.fromRotations(Offsets.FRONT_RIGHT_STEER_OFFSET))),
-        new SwerveModule(2,
-            new SwerveModuleConstants(
-                RobotMap.CAN.BACK_LEFT_DRIVE_MOTOR,
-                RobotMap.CAN.BACK_LEFT_AZIMUTH_MOTOR,
-                RobotMap.CAN.BACK_LEFT_CANCODER,
-                RobotMap.BUS.DRIVE,
-                RobotMap.BUS.AZIMUTH,
-                RobotMap.BUS.CANCODER,
-                Rotation2d.fromRotations(Offsets.BACK_LEFT_STEER_OFFSET))),
-        new SwerveModule(3,
-            new SwerveModuleConstants(
-                RobotMap.CAN.BACK_RIGHT_DRIVE_MOTOR,
-                RobotMap.CAN.BACK_RIGHT_AZIMUTH_MOTOR,
-                RobotMap.CAN.BACK_RIGHT_CANCODER,
-                RobotMap.BUS.DRIVE,
-                RobotMap.BUS.AZIMUTH,
-                RobotMap.BUS.CANCODER,
-                Rotation2d.fromRotations(Offsets.BACK_RIGHT_STEER_OFFSET)))
-        };
- 
-        /* By pausing init for a second before setting module offsets, we avoid a bug with inverting motors.
-         * See https://github.com/Team364/BaseFalconSwerve/issues/8 for more info.
+        // this can be compacted significantly, but this is what you have to do to make it work with
+        // our existing constants
+        mSwerveMods = new SwerveModule[] {
+                new SwerveModule(0, new SwerveModuleConstants(RobotMap.CAN.FRONT_LEFT_DRIVE_MOTOR,
+                        RobotMap.CAN.FRONT_LEFT_AZIMUTH_MOTOR, RobotMap.CAN.FRONT_LEFT_CANCODER,
+                        RobotMap.BUS.DRIVE, RobotMap.BUS.AZIMUTH, RobotMap.BUS.CANCODER,
+                        Rotation2d.fromRotations(Offsets.FRONT_LEFT_STEER_OFFSET))),
+                new SwerveModule(1, new SwerveModuleConstants(RobotMap.CAN.FRONT_RIGHT_DRIVE_MOTOR,
+                        RobotMap.CAN.FRONT_RIGHT_AZIMUTH_MOTOR, RobotMap.CAN.FRONT_RIGHT_CANCODER,
+                        RobotMap.BUS.DRIVE, RobotMap.BUS.AZIMUTH, RobotMap.BUS.CANCODER,
+                        Rotation2d.fromRotations(Offsets.FRONT_RIGHT_STEER_OFFSET))),
+                new SwerveModule(2, new SwerveModuleConstants(RobotMap.CAN.BACK_LEFT_DRIVE_MOTOR,
+                        RobotMap.CAN.BACK_LEFT_AZIMUTH_MOTOR, RobotMap.CAN.BACK_LEFT_CANCODER,
+                        RobotMap.BUS.DRIVE, RobotMap.BUS.AZIMUTH, RobotMap.BUS.CANCODER,
+                        Rotation2d.fromRotations(Offsets.BACK_LEFT_STEER_OFFSET))),
+                new SwerveModule(3, new SwerveModuleConstants(RobotMap.CAN.BACK_RIGHT_DRIVE_MOTOR,
+                        RobotMap.CAN.BACK_RIGHT_AZIMUTH_MOTOR, RobotMap.CAN.BACK_RIGHT_CANCODER,
+                        RobotMap.BUS.DRIVE, RobotMap.BUS.AZIMUTH, RobotMap.BUS.CANCODER,
+                        Rotation2d.fromRotations(Offsets.BACK_RIGHT_STEER_OFFSET)))};
+
+        /*
+         * By pausing init for a second before setting module offsets, we avoid a bug with inverting
+         * motors. See https://github.com/Team364/BaseFalconSwerve/issues/8 for more info.
          */
         Timer.delay(1.0);
         // resetModulesToAbsolute();
 
         this.limelight = new Limelight("limelight");
-        // limelight.setCameraPoseRobotSpace(new Pose3d(Units.inchesToMeters(3.375), 0, Units.inchesToMeters(21.6), new Rotation3d(0, 0, 0)));
-        if(limelight.getAlliancePose() != null){
-            this.poseEstimator = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), limelight.getAlliancePose().toPose2d());
+        // limelight.setCameraPoseRobotSpace(new Pose3d(Units.inchesToMeters(3.375), 0,
+        // Units.inchesToMeters(21.6), new Rotation3d(0, 0, 0)));
+        if (limelight.getAlliancePose() != null) {
+            this.poseEstimator = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS,
+                    getYaw(), getModulePositions(), limelight.getAlliancePose().toPose2d());
         } else {
-        this.poseEstimator = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), new Pose2d(0, 0, new Rotation2d(0)));
+            this.poseEstimator = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS,
+                    getYaw(), getModulePositions(), new Pose2d(0, 0, new Rotation2d(0)));
         }
         this.poseEstimator.update(getYaw(), getModulePositions());
-        this.swerveodo = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), new Pose2d());
-        if(limelight.getAlliancePose() != null){
-        swerveodo.resetPosition(getYaw(), getModulePositions(), limelight.getAlliancePose().toPose2d()); // TODO figure out how to do without camera
+        this.swerveodo = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS,
+                getYaw(), getModulePositions(), new Pose2d());
+        if (limelight.getAlliancePose() != null) {
+            swerveodo.resetPosition(getYaw(), getModulePositions(),
+                    limelight.getAlliancePose().toPose2d()); // TODO figure out how to do without
+                                                             // camera
         }
     }
 
-    public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
+    public void drive(Translation2d translation, double rotation, boolean fieldRelative,
+            boolean isOpenLoop) {
         SwerveModuleState[] swerveModuleStates =
-            DrivetrainConstants.SWERVE_KINEMATICS.toSwerveModuleStates(
-                fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                                    translation.getX(), 
-                                    translation.getY(), 
-                                    -rotation, 
-                                    getYaw()
-                                )
-                                : new ChassisSpeeds(
-                                    translation.getX(), 
-                                    translation.getY(), 
-                                    rotation)
-                                );
-        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, DrivetrainConstants.MAX_SPEED);
+                DrivetrainConstants.SWERVE_KINEMATICS.toSwerveModuleStates(fieldRelative
+                        ? ChassisSpeeds.fromFieldRelativeSpeeds(translation.getX(),
+                                translation.getY(), -rotation, getYaw())
+                        : new ChassisSpeeds(translation.getX(), translation.getY(), rotation));
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates,
+                DrivetrainConstants.MAX_SPEED);
 
-        for(SwerveModule mod : mSwerveMods){
+        for (SwerveModule mod : mSwerveMods) {
             mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop);
         }
     }
-    
+
     public void park() {
-        //as of yet, non-functional
-        mSwerveMods[0].setDesiredState(new SwerveModuleState(0d, DrivetrainConstants.FRONT_LEFT_RESTING_ANGLE), true);
-        mSwerveMods[1].setDesiredState(new SwerveModuleState(0d, DrivetrainConstants.FRONT_RIGHT_RESTING_ANGLE), true);
-        mSwerveMods[2].setDesiredState(new SwerveModuleState(0d, DrivetrainConstants.BACK_LEFT_RESTING_ANGLE), true);
-        mSwerveMods[3].setDesiredState(new SwerveModuleState(0d, DrivetrainConstants.BACK_RIGHT_RESTING_ANGLE), true);
+        // as of yet, non-functional
+        mSwerveMods[0].setDesiredState(
+                new SwerveModuleState(0d, DrivetrainConstants.FRONT_LEFT_RESTING_ANGLE), true);
+        mSwerveMods[1].setDesiredState(
+                new SwerveModuleState(0d, DrivetrainConstants.FRONT_RIGHT_RESTING_ANGLE), true);
+        mSwerveMods[2].setDesiredState(
+                new SwerveModuleState(0d, DrivetrainConstants.BACK_LEFT_RESTING_ANGLE), true);
+        mSwerveMods[3].setDesiredState(
+                new SwerveModuleState(0d, DrivetrainConstants.BACK_RIGHT_RESTING_ANGLE), true);
     }
 
     /* Used by SwerveControllerCommand in Auto */
     public void setModuleStates(SwerveModuleState[] desiredStates) {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, DrivetrainConstants.MAX_SPEED);
-        
-        for(SwerveModule mod : mSwerveMods){
+
+        for (SwerveModule mod : mSwerveMods) {
             mod.setDesiredState(desiredStates[mod.moduleNumber], false);
         }
-    }    
+    }
 
-    public Pose2d getPose() {
+    public Pose2d getVisionPose() {
         return poseEstimator.getEstimatedPosition();
     }
 
@@ -153,23 +136,23 @@ public class Swerve extends SubsystemBase {
         poseEstimator.resetPosition(getYaw(), getModulePositions(), pose);
     }
 
-    public SwerveModuleState[] getModuleStates(){
+    public SwerveModuleState[] getModuleStates() {
         SwerveModuleState[] states = new SwerveModuleState[4];
-        for(SwerveModule mod : mSwerveMods){
+        for (SwerveModule mod : mSwerveMods) {
             states[mod.moduleNumber] = mod.getState();
         }
         return states;
     }
 
-    public SwerveModulePosition[] getModulePositions(){
+    public SwerveModulePosition[] getModulePositions() {
         SwerveModulePosition[] positions = new SwerveModulePosition[4];
-        for(SwerveModule mod : mSwerveMods){
+        for (SwerveModule mod : mSwerveMods) {
             positions[mod.moduleNumber] = mod.getPosition();
         }
         return positions;
     }
 
-    public void zeroGyro(){
+    public void zeroGyro() {
         gyro.setYaw(0);
     }
 
@@ -180,8 +163,8 @@ public class Swerve extends SubsystemBase {
     /**
      * @return true if we trust the vision data, false if we don't
      */
-    public boolean trustVision() {
-        return (pose != null) && (limelight.hasTarget());
+    public boolean trustVision() { // TODO see if more filters needed
+        return (visionPose != null) && (limelight.hasTarget());
     }
 
     /**
@@ -194,17 +177,20 @@ public class Swerve extends SubsystemBase {
     }
 
     @Override
-    public void periodic(){
+    public void periodic() {
         poseEstimator.updateWithTime(Timer.getFPGATimestamp(), getYaw(), getModulePositions());
         swerveodo.updateWithTime(Timer.getFPGATimestamp(), getYaw(), getModulePositions());
-        pose = limelight.getAlliancePose();
+        visionPose = limelight.getAlliancePose();
         if (trustVision()) {
-            poseEstimator.addVisionMeasurement(pose.toPose2d(), Timer.getFPGATimestamp() - Units.millisecondsToSeconds(pose.getLatency()) - VisionConstants.PROCESS_LATENCY);
+            poseEstimator.addVisionMeasurement(visionPose.toPose2d(),
+                    Timer.getFPGATimestamp() - Units.millisecondsToSeconds(visionPose.getLatency())
+                            - VisionConstants.PROCESS_LATENCY);
         }
 
-        field.setRobotPose(getPose());
-        if(pose != null) {
-        visionField.setRobotPose(pose.getX(), pose.getY(), pose.getRotation().toRotation2d());
+        field.setRobotPose(getVisionPose());
+        if (visionPose != null) {
+            visionField.setRobotPose(visionPose.getX(), visionPose.getY(),
+                    visionPose.getRotation().toRotation2d());
         }
         odoField.setRobotPose(swerveodo.getEstimatedPosition());
 
@@ -214,11 +200,14 @@ public class Swerve extends SubsystemBase {
 
         SmartDashboard.putNumber("yaw", getYaw().getDegrees());
 
-        for(SwerveModule mod : mSwerveMods){
-            // SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder (raw)", mod.getCanCoderRaw());
+        for (SwerveModule mod : mSwerveMods) {
+            // SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder",
+            // mod.getCanCoder().getDegrees());
+            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder (raw)",
+                    mod.getCanCoderRaw());
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Integrated", mod.getAngleRaw());
-            // SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);    
+            // SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity",
+            // mod.getState().speedMetersPerSecond);
         }
     }
 }
