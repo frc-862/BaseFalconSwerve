@@ -31,7 +31,7 @@ public class Swerve extends SubsystemBase {
     public SwerveModule[] mSwerveMods;
     public SwerveDrivePoseEstimator poseEstimator;
     public SwerveDrivePoseEstimator swerveodo;
-    private Pose4d pose;
+    private Pose4d pose = new Pose4d(-1, -1, -1, -1, -1, -1,-1);
     private Field2d field = new Field2d();
     private Field2d visionField = new Field2d();
     private Field2d odoField = new Field2d();
@@ -95,10 +95,16 @@ public class Swerve extends SubsystemBase {
 
         this.limelight = new Limelight("limelight");
         // limelight.setCameraPoseRobotSpace(new Pose3d(Units.inchesToMeters(3.375), 0, Units.inchesToMeters(21.6), new Rotation3d(0, 0, 0)));
-        this.poseEstimator = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), limelight.getAlliancePose().toPose2d());
+        if(limelight.getAlliancePose() != null){
+            this.poseEstimator = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), limelight.getAlliancePose().toPose2d());
+        } else {
+        this.poseEstimator = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), new Pose2d(0, 0, new Rotation2d(0)));
+        }
         this.poseEstimator.update(getYaw(), getModulePositions());
         this.swerveodo = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), new Pose2d());
-        swerveodo.resetPosition(getYaw(), getModulePositions(), limelight.getAlliancePose().toPose2d());
+        if(limelight.getAlliancePose() != null){
+        swerveodo.resetPosition(getYaw(), getModulePositions(), limelight.getAlliancePose().toPose2d()); // TODO figure out how to do without camera
+        }
     }
 
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
@@ -197,7 +203,9 @@ public class Swerve extends SubsystemBase {
         }
 
         field.setRobotPose(getPose());
+        if(pose != null) {
         visionField.setRobotPose(pose.getX(), pose.getY(), pose.getRotation().toRotation2d());
+        }
         odoField.setRobotPose(swerveodo.getEstimatedPosition());
 
         SmartDashboard.putData("field", field);
