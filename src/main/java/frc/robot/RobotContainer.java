@@ -26,7 +26,7 @@ public class RobotContainer extends LightningContainer {
 
     private static final XboxController driver = new XboxController(ControllerConstants.DRIVER_CONTROLLER_PORT);
 
-     private static final AutonomousCommandFactory autoFactory = new AutonomousCommandFactory(drivetrain::getPose, drivetrain::resetOdometry, drivetrain.getDriveKinematics(),
+     private static final AutonomousCommandFactory autoFactory = new AutonomousCommandFactory(drivetrain::getPoseNoVision, drivetrain::resetOdometry, drivetrain.getDriveKinematics(),
             AutonomousConstants.DRIVE_PID_CONSTANTS, AutonomousConstants.THETA_PID_CONSTANTS, AutonomousConstants.POSE_PID_CONSTANTS, drivetrain::setModuleStates, drivetrain);
 
     @Override

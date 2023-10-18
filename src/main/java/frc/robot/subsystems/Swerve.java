@@ -137,6 +137,16 @@ public class Swerve extends SubsystemBase {
     }
 
     /**
+     * 
+     * @return Pose estimator pose without vision
+     */
+    public Pose2d getPoseNoVision() {
+        return swerveodo.getEstimatedPosition();
+    }
+
+
+
+    /**
      * Sets poseEstimator position to given: (x, y), and gyro heading
      * @param pose pose2d, (x, y)
      */
