@@ -76,16 +76,16 @@ public final class Constants {
             public static final double kP = 3;//22
             public static final double kI = 0.0;//22d;
             public static final double kD = 0.1;//0005d;
-            public static final double kS = 3;//54d;
+            public static final double kS = 2;//54d;
         }
 
         // Gains vaules for PIDControllers
         public static final class DriveGains {
-            public static final double kP = 0.22;// .116d;
-            public static final double kI = 0.22d;
-            public static final double kD = 0.001d;
+            public static final double kP = 0.02;// .116d;
+            public static final double kI = 0.0d;
+            public static final double kD = 0.0d;
 
-            public static final double kS = 0.225;// 229d;
+            public static final double kS = 0.0d;// 229d;
             public static final double kV = 0d;
             public static final double kA = 0d;
         }
@@ -144,11 +144,11 @@ public final class Constants {
     }
 
     public static final class AutonomousConstants {
-        public static final PIDConstants DRIVE_PID_CONSTANTS = new PIDConstants(2.5, 0, 0); // Drive velocity PID 10.5
-        public static final PIDConstants THETA_PID_CONSTANTS = new PIDConstants(4, 0, 0); // Rotation PID 7
+        public static final PIDConstants DRIVE_PID_CONSTANTS = new PIDConstants(0.01, 0, 0); // Drive velocity PID 2.5
+        public static final PIDConstants THETA_PID_CONSTANTS = new PIDConstants(0.01, 0, 0); // Rotation PID 1
         public static final PIDConstants POSE_PID_CONSTANTS = new PIDConstants(0, 0, 0); // X and Y position PID
 
-        public static final PathConstraints CUBE_CHASE_CONSTRAINTS = new PathConstraints(2, 2); // TODO TEST FOR MAX 
+        public static final PathConstraints CUBE_CHASE_CONSTRAINTS = new PathConstraints(2, 1); // TODO TEST FOR MAX 
     
         public static final double MAX_VELOCITY = 2;
         public static final double MAX_ACCELERATION = 1;
