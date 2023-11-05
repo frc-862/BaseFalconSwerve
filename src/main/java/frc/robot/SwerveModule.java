@@ -4,12 +4,16 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.CAN;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.thunder.math.Conversions;
 import frc.thunder.swerve.CTREModuleState;
 import frc.thunder.swerve.SwerveModuleConstants;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
@@ -25,9 +29,10 @@ public class SwerveModule {
     private Rotation2d angleOffset;
     private Rotation2d lastAngle;
 
-    private TalonFX mAngleMotor;
-    private TalonFX mDriveMotor;
+    private CANSparkMax mAngleMotor;
+    private CANSparkMax mDriveMotor;
     private CANcoder angleEncoder;
+    private SparkMaxPIDController pidController;
 
     SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(DriveGains.kS, DriveGains.kV, DriveGains.kA);
 
@@ -40,11 +45,11 @@ public class SwerveModule {
         configAngleEncoder();
 
         /* Angle Motor Config */
-        mAngleMotor = new TalonFX(moduleConstants.angleMotorID, moduleConstants.angleMotorBus);
+        mAngleMotor = new CANSparkMax(moduleConstants.angleMotorID, MotorType.kBrushless);
         configAngleMotor();
 
         /* Drive Motor Config */
-        mDriveMotor = new TalonFX(moduleConstants.driveMotorID, moduleConstants.driveMotorBus);
+        mDriveMotor = new CANSparkMax(moduleConstants.driveMotorID, MotorType.kBrushless);
         configDriveMotor();
 
         lastAngle = getState().angle;
@@ -65,11 +70,13 @@ public class SwerveModule {
     private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop){
         if(isOpenLoop){
             double percentOutput = desiredState.speedMetersPerSecond / DrivetrainConstants.MAX_SPEED;
-            mDriveMotor.setControl(new DutyCycleOut(percentOutput, true, false));
+            mDriveMotor.set(percentOutput);
         }
         else {
             double velocity = Conversions.getInputShaftRotations((desiredState.speedMetersPerSecond / DrivetrainConstants.WHEEL_CIRCUMFERENCE), DrivetrainConstants.GEAR_RATIO);
-            mDriveMotor.setControl(new VelocityDutyCycle(velocity, true, feedforward.calculate(desiredState.speedMetersPerSecond), 0, false));
+            // mDriveMotor.setControl(new VelocityDutyCycle(velocity, true, feedforward.calculate(desiredState.speedMetersPerSecond), 0, false));
+            // TODO do this thingy
+            mDriveMotor.set(velocity);
         }
     }
 
@@ -97,12 +104,12 @@ public class SwerveModule {
     }
 
     public double getAngleRaw(){
-        return mAngleMotor.getRotorPosition().getValue();
+        return mAngleMotor.getEncoder().getPosition();
     }
 
     public void resetToAbsolute(){
         double absolutePosition = getCanCoder().getRotations() * DrivetrainConstants.ANGLE_RATIO;
-        mAngleMotor.setRotorPosition(absolutePosition);
+        mAngleMotor.getEncoder().setPosition(absolutePosition);
     }
 
     private void configAngleEncoder(){        
@@ -113,11 +120,12 @@ public class SwerveModule {
     }
 
     private void configAngleMotor(){
-        mAngleMotor.getConfigurator().apply(new TalonFXConfiguration());
-        TalonFXConfiguration config = new CTREConfigs().swerveAngleFXConfig;
-        config.Feedback.FeedbackRemoteSensorID = angleEncoder.getDeviceID();
-        mAngleMotor.getConfigurator().apply(config);
-        resetToAbsolute();
+        mAngleMotor.setInverted(invert);
+        mAngleMotor.setSmartCurrentLimit(currentLimit);
+        mAngleMotor.enableVoltageCompensation(voltageCompensation);
+        mAngleMotor.setIdleMode(idleMode);
+
+        mAngleMotor.burnFlash();
     }
 
     private void configDriveMotor(){        

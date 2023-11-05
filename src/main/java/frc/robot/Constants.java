@@ -10,6 +10,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.I2C;
 import frc.thunder.pathplanner.com.pathplanner.lib.PathConstraints;
 import frc.thunder.pathplanner.com.pathplanner.lib.auto.PIDConstants;
+import com.revrobotics.CANSparkMax.IdleMode;
 
 
 public final class Constants {
@@ -33,13 +34,11 @@ public final class Constants {
         public static final double DRIVETRAIN_TRACKWIDTH_METERS = Units.inchesToMeters(22.5);
         public static final double DRIVETRAIN_WHEELBASE_METERS =  Units.inchesToMeters(22.5);
 
-        public static final double DRIVE_SUPPLY_LIMIT = 40d;
-        public static final double DRIVE_SUPPLY_THRESHOLD = 60d;
-        public static final double DRIVE_SUPPLY_TIMEOUT = 0.25;
+        public static final int DRIVE_SUPPLY_LIMIT = 40;
+        public static final double DRIVE_VOLTAGE_COMPENSATION = 12;
 
-        public static final double AZIMUTH_SUPPLY_LIMIT = 40d;
-        public static final double AZIMUTH_SUPPLY_THRESHOLD = 40d;
-        public static final double AZIMUTH_SUPPLY_TIMEOUT = 0.25;
+        public static final int AZIMUTH_SUPPLY_LIMIT = 40;
+        public static final double AZIMUTH_VOLTAGE_COMPENSATION = 12;
 
         public static final double DRIVE_OPEN_RAMP_RATE = 0.25;
         public static final double DRIVE_CLOSED_RAMP_RATE = 0.0;
@@ -51,11 +50,11 @@ public final class Constants {
         public static final double WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_DIAMETER;
         public static final double ANGLE_RATIO = 150/7;
 
-        public static final InvertedValue ANGLE_INVERT = InvertedValue.Clockwise_Positive;
-        public static final InvertedValue DRIVE_INVERT = InvertedValue.Clockwise_Positive;
+        public static final boolean ANGLE_INVERT = false;
+        public static final boolean DRIVE_INVERT = false;
 
-        public static final NeutralModeValue ANGLE_NEUTRAL = NeutralModeValue.Brake;
-        public static final NeutralModeValue DRIVE_NEUTRAL = NeutralModeValue.Brake;
+        public static final IdleMode ANGLE_NEUTRAL = IdleMode.kBrake;
+        public static final IdleMode DRIVE_NEUTRAL = IdleMode.kBrake;
 
         // i swapped the left and right negations here in order to fix an issue with turn motors being oriented like an X instead of a diamond. There is likely some underlying cause that should be addressed, perhaps something to do with sensor inverts, or some other novel phoenix 6 thing
         // i do remember noticing similar behavior when using phoenix 6 on HaD, so that does point me to it being the underlying cause
