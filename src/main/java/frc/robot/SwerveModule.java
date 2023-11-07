@@ -9,17 +9,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.thunder.math.Conversions;
 import frc.thunder.swerve.CTREModuleState;
 import frc.thunder.swerve.SwerveModuleConstants;
-import frc.robot.REVConfigs;
 
-import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.PositionDutyCycle;
-import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.CANcoder;
 
 import frc.robot.Constants.DrivetrainConstants.DriveGains;
@@ -33,7 +26,6 @@ public class SwerveModule {
     private CANSparkMax mAngleMotor;
     private CANSparkMax mDriveMotor;
     private CANcoder angleEncoder;
-    private SparkMaxPIDController pidController;
 
     SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(DriveGains.kS, DriveGains.kV, DriveGains.kA);
 
