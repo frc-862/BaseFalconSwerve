@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.thunder.math.Conversions;
 import frc.thunder.swerve.CTREModuleState;
 import frc.thunder.swerve.SwerveModuleConstants;
+import frc.robot.REVConfigs;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.CANSparkMax;
@@ -46,11 +47,13 @@ public class SwerveModule {
 
         /* Angle Motor Config */
         mAngleMotor = new CANSparkMax(moduleConstants.angleMotorID, MotorType.kBrushless);
-        configAngleMotor();
+        REVConfigs angleConfig = new REVConfigs();
+        angleConfig.configAngleMotor(mAngleMotor);
 
         /* Drive Motor Config */
         mDriveMotor = new CANSparkMax(moduleConstants.driveMotorID, MotorType.kBrushless);
-        configDriveMotor();
+        REVConfigs driveConfig = new REVConfigs();
+        driveConfig.configDriveMotor(mDriveMotor);
 
         lastAngle = getState().angle;
 
@@ -74,8 +77,6 @@ public class SwerveModule {
         }
         else {
             double velocity = Conversions.getInputShaftRotations((desiredState.speedMetersPerSecond / DrivetrainConstants.WHEEL_CIRCUMFERENCE), DrivetrainConstants.GEAR_RATIO);
-            // mDriveMotor.setControl(new VelocityDutyCycle(velocity, true, feedforward.calculate(desiredState.speedMetersPerSecond), 0, false));
-            // TODO do this thingy
             mDriveMotor.set(velocity);
         }
     }
@@ -83,16 +84,15 @@ public class SwerveModule {
     private void setAngle(SwerveModuleState desiredState){
         Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (DrivetrainConstants.MAX_SPEED * 0.01)) ? lastAngle : desiredState.angle; //Prevent rotating module if speed is less then 1%. Prevents Jittering.
         
-        // mAngleMotor.setControl(new PositionDutyCycle((angle.getDegrees() / 360) * DrivetrainConstants.ANGLE_RATIO));
-        // mAngleMotor.setControl(new PositionDutyCycle((0)));
-        mAngleMotor.setControl(new PositionDutyCycle(angle.getRotations()));
+
+        mAngleMotor.set(angle.getRotations());
 
 
         lastAngle = angle;
     }
 
     private Rotation2d getAngle(){
-        return Rotation2d.fromRotations(mAngleMotor.getRotorPosition().getValue() / DrivetrainConstants.ANGLE_RATIO);
+        return Rotation2d.fromRotations(mAngleMotor.getEncoder().getPosition() / DrivetrainConstants.ANGLE_RATIO);
     }
 
     public Rotation2d getCanCoder(){
@@ -119,31 +119,16 @@ public class SwerveModule {
         angleEncoder.getConfigurator().apply(config);
     }
 
-    private void configAngleMotor(){
-        mAngleMotor.setInverted(invert);
-        mAngleMotor.setSmartCurrentLimit(currentLimit);
-        mAngleMotor.enableVoltageCompensation(voltageCompensation);
-        mAngleMotor.setIdleMode(idleMode);
-
-        mAngleMotor.burnFlash();
-    }
-
-    private void configDriveMotor(){        
-        mDriveMotor.getConfigurator().apply(new TalonFXConfiguration());
-        mDriveMotor.getConfigurator().apply(new CTREConfigs().swerveDriveFXConfig);
-        mDriveMotor.setRotorPosition(0);
-    }
-
     public SwerveModuleState getState(){
         return new SwerveModuleState(
-            Conversions.getOutputShaftRotations(mDriveMotor.getRotorVelocity().getValue(), DrivetrainConstants.GEAR_RATIO) * DrivetrainConstants.WHEEL_CIRCUMFERENCE,
+            Conversions.getOutputShaftRotations(mDriveMotor.getEncoder().getVelocity(), DrivetrainConstants.GEAR_RATIO) * DrivetrainConstants.WHEEL_CIRCUMFERENCE,
             getAngle()
         ); 
     }
 
     public SwerveModulePosition getPosition(){
         return new SwerveModulePosition(
-            Conversions.getOutputShaftRotations(mDriveMotor.getRotorPosition().getValue(), DrivetrainConstants.GEAR_RATIO) * DrivetrainConstants.WHEEL_CIRCUMFERENCE,
+            Conversions.getOutputShaftRotations(mDriveMotor.getEncoder().getPosition(), DrivetrainConstants.GEAR_RATIO) * DrivetrainConstants.WHEEL_CIRCUMFERENCE,
             getAngle()
         );
     }
