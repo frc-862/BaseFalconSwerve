@@ -81,13 +81,13 @@ public final class Constants {
 
         // Gains vaules for PIDControllers
         public static final class DriveGains {
-            public static final double kP = 0.02;// .116d;
+            public static final double kP = 0.17047;// .116d;
             public static final double kI = 0.0d;
             public static final double kD = 0.0d;
 
-            public static final double kS = 0.0d;// 229d;
-            public static final double kV = 0d;
-            public static final double kA = 0d;
+            public static final double kS = 0.21032d;// 229d;
+            public static final double kV = 0.11718d;
+            public static final double kA = 0.0056268d;
         }
 
         // Steer offsets for our modules
