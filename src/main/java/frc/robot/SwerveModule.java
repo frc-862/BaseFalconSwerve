@@ -4,6 +4,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.AnalogEncoder;
 import edu.wpi.first.wpilibj.CAN;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.thunder.math.Conversions;
@@ -26,7 +27,7 @@ public class SwerveModule {
 
     private CANSparkMax mAngleMotor;
     private CANSparkMax mDriveMotor;
-    private CANcoder angleEncoder;
+    private AnalogEncoder angleEncoder;
 
     SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(DriveGains.kS, DriveGains.kV, DriveGains.kA);
 
@@ -35,7 +36,7 @@ public class SwerveModule {
         this.angleOffset = moduleConstants.angleOffset;
         
         /* Angle Encoder Config */
-        angleEncoder = new CANcoder(moduleConstants.cancoderID, moduleConstants.cancoderBus);
+        angleEncoder = new AnalogEncoder(moduleConstants.cancoderID);
         configAngleEncoder();
 
         /* Angle Motor Config */
@@ -49,7 +50,7 @@ public class SwerveModule {
         lastAngle = getState().angle;
 
         // mAngleMotor.setRotorPosition(0);
-        angleEncoder.setPosition(getCanCoderRaw());
+        // angleEncoder.setPosition(getCanCoderRaw());
         resetToAbsolute();
     }
 
@@ -83,11 +84,11 @@ public class SwerveModule {
     }
 
     public Rotation2d getCanCoder(){
-        return Rotation2d.fromRotations((angleEncoder.getAbsolutePosition().getValue()));//= - angleOffset.getRotations()));
+        return Rotation2d.fromRotations((angleEncoder.getAbsolutePosition()));//= - angleOffset.getRotations()));
     }
 
     public double getCanCoderRaw(){
-        return angleEncoder.getAbsolutePosition().getValue();// - angleOffset.getRotations();
+        return angleEncoder.getAbsolutePosition();// - angleOffset.getRotations();
     }
 
     public double getAngleRaw(){
@@ -99,11 +100,8 @@ public class SwerveModule {
         mAngleMotor.getEncoder().setPosition(absolutePosition);
     }
 
-    private void configAngleEncoder(){        
-        angleEncoder.getConfigurator().apply(new CANcoderConfiguration());
-        CANcoderConfiguration config = new CTREConfigs().swerveCanCoderConfig;
-        config.MagnetSensor.MagnetOffset = -angleOffset.getRotations();
-        angleEncoder.getConfigurator().apply(config);
+    private void configAngleEncoder(){
+        angleEncoder.setPositionOffset(-angleOffset.getRotations());
     }
 
     public SwerveModuleState getState(){

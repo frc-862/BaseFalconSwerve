@@ -109,19 +109,19 @@ public final class Constants {
             // Front left CanIDs
             public static final int FRONT_LEFT_DRIVE_MOTOR = 1;
             public static final int FRONT_LEFT_AZIMUTH_MOTOR = 2;
-            public static final int FRONT_LEFT_CANCODER = 31;
+            public static final int FRONT_LEFT_CANCODER = 0;
             // Front right CanIDs
             public static final int FRONT_RIGHT_DRIVE_MOTOR = 3;
             public static final int FRONT_RIGHT_AZIMUTH_MOTOR = 4;
-            public static final int FRONT_RIGHT_CANCODER = 33;
+            public static final int FRONT_RIGHT_CANCODER = 1;
             // Back right CanIDs
             public static final int BACK_RIGHT_DRIVE_MOTOR = 5;
             public static final int BACK_RIGHT_AZIMUTH_MOTOR = 6;
-            public static final int BACK_RIGHT_CANCODER = 32;
+            public static final int BACK_RIGHT_CANCODER = 2;
             // Back left CanIDs
             public static final int BACK_LEFT_DRIVE_MOTOR = 7;
             public static final int BACK_LEFT_AZIMUTH_MOTOR = 8;
-            public static final int BACK_LEFT_CANCODER = 34;
+            public static final int BACK_LEFT_CANCODER = 3;
         }
 
         public static final class BUS {
