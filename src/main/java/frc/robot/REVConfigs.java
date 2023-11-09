@@ -6,7 +6,7 @@ import frc.robot.Constants.DrivetrainConstants.AzimuthGains;
 import frc.robot.Constants.DrivetrainConstants.DriveGains;
 
 public class REVConfigs {
-    public CANSparkMax configAngleMotor(CANSparkMax motor){
+    public static CANSparkMax configAngleMotor(CANSparkMax motor) {
         motor.setInverted(DrivetrainConstants.ANGLE_INVERT);
         motor.setSmartCurrentLimit(DrivetrainConstants.AZIMUTH_SUPPLY_LIMIT);
         motor.enableVoltageCompensation(DrivetrainConstants.AZIMUTH_VOLTAGE_COMPENSATION);
@@ -22,7 +22,7 @@ public class REVConfigs {
         return motor;
     }
 
-public CANSparkMax configDriveMotor(CANSparkMax motor){
+    public static CANSparkMax configDriveMotor(CANSparkMax motor){
         motor.setInverted(DrivetrainConstants.DRIVE_INVERT);
         motor.setSmartCurrentLimit(DrivetrainConstants.DRIVE_SUPPLY_LIMIT);
         motor.enableVoltageCompensation(DrivetrainConstants.DRIVE_VOLTAGE_COMPENSATION);

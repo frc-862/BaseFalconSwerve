@@ -11,6 +11,7 @@ import frc.thunder.swerve.CTREModuleState;
 import frc.thunder.swerve.SwerveModuleConstants;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -39,13 +40,11 @@ public class SwerveModule {
 
         /* Angle Motor Config */
         mAngleMotor = new CANSparkMax(moduleConstants.angleMotorID, MotorType.kBrushless);
-        REVConfigs angleConfig = new REVConfigs();
-        angleConfig.configAngleMotor(mAngleMotor);
+        REVConfigs.configAngleMotor(mAngleMotor);
 
         /* Drive Motor Config */
         mDriveMotor = new CANSparkMax(moduleConstants.driveMotorID, MotorType.kBrushless);
-        REVConfigs driveConfig = new REVConfigs();
-        driveConfig.configDriveMotor(mDriveMotor);
+        REVConfigs.configDriveMotor(mDriveMotor);
 
         lastAngle = getState().angle;
 
@@ -56,8 +55,7 @@ public class SwerveModule {
 
     public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop){
         /* This is a custom optimize function, since default WPILib optimize assumes continuous controller which CTRE and Rev onboard is not */
-        desiredState = CTREModuleState.optimize(desiredState, getCanCoder()); 
-        // SwerveModuleState.optimize(desiredState, getCanCoder());
+        desiredState = CTREModuleState.optimize(desiredState, getCanCoder());
         setAngle(desiredState);
         setSpeed(desiredState, isOpenLoop);
     }
@@ -69,16 +67,13 @@ public class SwerveModule {
         }
         else {
             double velocity = Conversions.getInputShaftRotations((desiredState.speedMetersPerSecond / DrivetrainConstants.WHEEL_CIRCUMFERENCE), DrivetrainConstants.GEAR_RATIO);
-            mDriveMotor.set(velocity);
+            mDriveMotor.getPIDController().setReference(velocity, ControlType.kVelocity);
         }
     }
 
     private void setAngle(SwerveModuleState desiredState){
         Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (DrivetrainConstants.MAX_SPEED * 0.01)) ? lastAngle : desiredState.angle; //Prevent rotating module if speed is less then 1%. Prevents Jittering.
-        
-
-        mAngleMotor.set(angle.getRotations());
-
+        mAngleMotor.getPIDController().setReference((angle.getRotations()), ControlType.kPosition);
 
         lastAngle = angle;
     }

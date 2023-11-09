@@ -27,7 +27,7 @@ public final class Constants {
     public static final class DrivetrainConstants {
 
         // Our drivetrain track width and Wheelbase
-        public static final double DRIVETRAIN_TRACKWIDTH_METERS = Units.inchesToMeters(22.5);
+        public static final double DRIVETRAIN_TRACKWIDTH_METERS = Units.inchesToMeters(22.5); //TODO: update for hurleybot
         public static final double DRIVETRAIN_WHEELBASE_METERS =  Units.inchesToMeters(22.5);
 
         public static final int DRIVE_SUPPLY_LIMIT = 40;
@@ -44,34 +44,31 @@ public final class Constants {
         public static final double GEAR_RATIO = 6.75;
         public static final double WHEEL_DIAMETER = Units.inchesToMeters(4d);
         public static final double WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_DIAMETER;
-        public static final double ANGLE_RATIO = 150/7;
+        public static final double ANGLE_RATIO = 12.8/1;
 
-        public static final boolean ANGLE_INVERT = false;
-        public static final boolean DRIVE_INVERT = false;
+        public static final boolean ANGLE_INVERT = true;
+        public static final boolean DRIVE_INVERT = true;
 
         public static final IdleMode ANGLE_NEUTRAL = IdleMode.kBrake;
         public static final IdleMode DRIVE_NEUTRAL = IdleMode.kBrake;
 
-        // i swapped the left and right negations here in order to fix an issue with turn motors being oriented like an X instead of a diamond. There is likely some underlying cause that should be addressed, perhaps something to do with sensor inverts, or some other novel phoenix 6 thing
-        // i do remember noticing similar behavior when using phoenix 6 on HaD, so that does point me to it being the underlying cause
         public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(
-            new Translation2d(DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
-            new Translation2d(DRIVETRAIN_WHEELBASE_METERS / 2.0, -DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
-            new Translation2d(-DRIVETRAIN_WHEELBASE_METERS / 2.0, DRIVETRAIN_TRACKWIDTH_METERS / 2.0),
-            new Translation2d(-DRIVETRAIN_WHEELBASE_METERS / 2.0, -DRIVETRAIN_TRACKWIDTH_METERS / 2.0)
-        );
+            new Translation2d(DrivetrainConstants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DrivetrainConstants.DRIVETRAIN_WHEELBASE_METERS / 2.0),
+            new Translation2d(DrivetrainConstants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DrivetrainConstants.DRIVETRAIN_WHEELBASE_METERS / 2.0),
+            new Translation2d(-DrivetrainConstants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DrivetrainConstants.DRIVETRAIN_WHEELBASE_METERS / 2.0),
+            new Translation2d(-DrivetrainConstants.DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DrivetrainConstants.DRIVETRAIN_WHEELBASE_METERS / 2.0));
 
         public static final Rotation2d FRONT_LEFT_RESTING_ANGLE = Rotation2d.fromDegrees(-45d);
         public static final Rotation2d FRONT_RIGHT_RESTING_ANGLE = Rotation2d.fromDegrees(45d);
         public static final Rotation2d BACK_LEFT_RESTING_ANGLE = Rotation2d.fromDegrees(45d);
         public static final Rotation2d BACK_RIGHT_RESTING_ANGLE = Rotation2d.fromDegrees(-45d);
 
-        // very BS tuning (no matter how well it works :P)
+        // taken from SDS TODO: tune
         public static final class AzimuthGains {
-            public static final double kP = 3;//22
-            public static final double kI = 0.0;//22d;
-            public static final double kD = 0.1;//0005d;
-            public static final double kS = 3;//54d;
+            public static final double kP = 1.0;
+            public static final double kI = 0.0;
+            public static final double kD = 0.1;
+            public static final double kS = 0.0;
         }
 
         // Gains vaules for PIDControllers
@@ -88,10 +85,10 @@ public final class Constants {
         // Steer offsets for our modules
         public static final class Offsets {
             // swerve module absolute encoder offsets
-                public static final double FRONT_LEFT_STEER_OFFSET  = 0.224609;
-                public static final double FRONT_RIGHT_STEER_OFFSET = 0.116699;
-                public static final double BACK_LEFT_STEER_OFFSET   = -0.132812;
-                public static final double BACK_RIGHT_STEER_OFFSET  = -0.322754;
+                public static final double FRONT_LEFT_STEER_OFFSET  = 0.0;
+                public static final double FRONT_RIGHT_STEER_OFFSET = 0.0;
+                public static final double BACK_LEFT_STEER_OFFSET   = 0.0;
+                public static final double BACK_RIGHT_STEER_OFFSET  = 0.0;
         }
     }
 
