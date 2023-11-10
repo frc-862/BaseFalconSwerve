@@ -5,6 +5,7 @@ import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Constants.RobotMap;
 import frc.robot.Constants.VisionConstants;
 import frc.thunder.vision.Limelight;
+import frc.thunder.shuffleboard.LightningShuffleboard;
 import frc.thunder.swerve.SwerveModuleConstants;
 import frc.thunder.util.Pose4d;
 import frc.robot.Constants.DrivetrainConstants.Offsets;
@@ -15,7 +16,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -24,7 +24,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Swerve extends SubsystemBase {
@@ -191,26 +190,22 @@ public class Swerve extends SubsystemBase {
     public void periodic(){
         poseEstimator.updateWithTime(Timer.getFPGATimestamp(), getYaw(), getModulePositions());
         swerveodo.updateWithTime(Timer.getFPGATimestamp(), getYaw(), getModulePositions());
-        pose = limelight.getAlliancePose();
         if (trustVision()) {
             poseEstimator.addVisionMeasurement(pose.toPose2d(), Timer.getFPGATimestamp() - Units.millisecondsToSeconds(pose.getLatency()) - VisionConstants.PROCESS_LATENCY);
+            pose = limelight.getAlliancePose();
         }
 
+        //Only update shuffleboard every other run
         field.setRobotPose(getPose());
-        visionField.setRobotPose(pose.getX(), pose.getY(), pose.getRotation().toRotation2d());
+        if (trustVision()) {
+            visionField.setRobotPose(pose.getX(), pose.getY(), pose.getRotation().toRotation2d());
+        }
         odoField.setRobotPose(swerveodo.getEstimatedPosition());
 
-        SmartDashboard.putData("field", field);
-        SmartDashboard.putData("visionField", visionField);
-        SmartDashboard.putData("odoField", odoField);
+        LightningShuffleboard.set("Odometry", "Pose Estimator Field", field);
+        LightningShuffleboard.set("Odometry", "Vision Field", visionField);
+        LightningShuffleboard.set("Odometry", "Odometry Field", odoField);
 
-        SmartDashboard.putNumber("yaw", getYaw().getDegrees());
-
-        for(SwerveModule mod : mSwerveMods){
-            // SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder (raw)", mod.getCanCoderRaw());
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Integrated", mod.getAngleRaw());
-            // SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);    
-        }
+        LightningShuffleboard.setDouble("Swerve", "yaw", getYaw().getDegrees());
     }
 }
