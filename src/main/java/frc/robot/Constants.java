@@ -41,7 +41,7 @@ public final class Constants {
 
         public static final double MAX_SPEED = Units.feetToMeters(16.2);
         public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MAX_SPEED / Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
-        public static final double GEAR_RATIO = 6.75;
+        public static final double DRIVE_RATIO = 6.75;
         public static final double WHEEL_DIAMETER = Units.inchesToMeters(4d);
         public static final double WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_DIAMETER;
         public static final double ANGLE_RATIO = 12.8/1;
@@ -65,9 +65,9 @@ public final class Constants {
 
         // taken from SDS TODO: tune
         public static final class AzimuthGains {
-            public static final double kP = 1.0;
+            public static final double kP = 0.078;
             public static final double kI = 0.0;
-            public static final double kD = 0.1;
+            public static final double kD = 0.00;//78;
             public static final double kS = 0.0;
         }
 

@@ -1,6 +1,9 @@
 package frc.robot;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxPIDController;
+
 import frc.robot.Constants.DrivetrainConstants;
 import frc.robot.Constants.DrivetrainConstants.AzimuthGains;
 import frc.robot.Constants.DrivetrainConstants.DriveGains;
@@ -12,10 +15,11 @@ public class REVConfigs {
         motor.enableVoltageCompensation(DrivetrainConstants.AZIMUTH_VOLTAGE_COMPENSATION);
         motor.setIdleMode(DrivetrainConstants.ANGLE_NEUTRAL);
 
-        motor.getPIDController().setP(AzimuthGains.kP);
-        motor.getPIDController().setI(AzimuthGains.kI);
-        motor.getPIDController().setD(AzimuthGains.kD);
-        motor.getPIDController().setFF(AzimuthGains.kS);
+        SparkMaxPIDController PIDController = motor.getPIDController();
+        PIDController.setP(AzimuthGains.kP);
+        PIDController.setI(AzimuthGains.kI);
+        PIDController.setD(AzimuthGains.kD);
+        PIDController.setFF(AzimuthGains.kS);
 
         motor.burnFlash();
 
@@ -28,10 +32,11 @@ public class REVConfigs {
         motor.enableVoltageCompensation(DrivetrainConstants.DRIVE_VOLTAGE_COMPENSATION);
         motor.setIdleMode(DrivetrainConstants.ANGLE_NEUTRAL);
 
-        motor.getPIDController().setP(DriveGains.kP);
-        motor.getPIDController().setI(DriveGains.kI);
-        motor.getPIDController().setD(DriveGains.kD);
-        motor.getPIDController().setFF(DriveGains.kS);
+        SparkMaxPIDController PIDController = motor.getPIDController();
+        PIDController.setP(DriveGains.kP);
+        PIDController.setI(DriveGains.kI);
+        PIDController.setD(DriveGains.kD);
+        PIDController.setFF(DriveGains.kS);
 
         motor.setOpenLoopRampRate(DrivetrainConstants.DRIVE_OPEN_RAMP_RATE);
         motor.setClosedLoopRampRate(DrivetrainConstants.DRIVE_CLOSED_RAMP_RATE);

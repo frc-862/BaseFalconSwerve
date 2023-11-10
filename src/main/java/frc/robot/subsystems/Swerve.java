@@ -186,6 +186,12 @@ public class Swerve extends SubsystemBase {
         return DrivetrainConstants.SWERVE_KINEMATICS;
     }
 
+    public void resetModulesToAbsolute() {
+        for(SwerveModule mod : mSwerveMods) {
+            mod.resetToAbsolute();
+        }
+    }
+
     @Override
     public void periodic(){
         poseEstimator.updateWithTime(Timer.getFPGATimestamp(), getYaw(), getModulePositions());
@@ -207,9 +213,12 @@ public class Swerve extends SubsystemBase {
 
         for(SwerveModule mod : mSwerveMods){
             // SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder (raw)", mod.getCanCoderRaw());
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Integrated", mod.getAngleRaw());
+            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder (raw)", mod.getAbsPos().getRotations());
+            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Integrated", mod.getAngle().getRotations());
             // SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);    
         }
     }
+
+
+
 }

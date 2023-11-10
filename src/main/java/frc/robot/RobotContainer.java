@@ -26,8 +26,7 @@ public class RobotContainer extends LightningContainer {
 
     @Override
     protected void configureButtonBindings() {
-        // new Trigger(driver::getAButton).onTrue(new
-        // InstantCommand(drivetrain::resetModulesToAbsolute));
+        new Trigger(driver::getAButton).onTrue(new InstantCommand(drivetrain::resetModulesToAbsolute));
         new Trigger(driver::getXButton).whileTrue(new InstantCommand(drivetrain::park, drivetrain));
 
     }

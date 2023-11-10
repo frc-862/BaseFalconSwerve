@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -49,14 +50,12 @@ public class SwerveModule {
 
         lastAngle = getState().angle;
 
-        // mAngleMotor.setRotorPosition(0);
-        // angleEncoder.setPosition(getCanCoderRaw());
         resetToAbsolute();
     }
 
     public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop){
         /* This is a custom optimize function, since default WPILib optimize assumes continuous controller which CTRE and Rev onboard is not */
-        desiredState = CTREModuleState.optimize(desiredState, getCanCoder());
+        desiredState = CTREModuleState.optimize(desiredState, getAbsPos());
         setAngle(desiredState);
         setSpeed(desiredState, isOpenLoop);
     }
@@ -67,28 +66,28 @@ public class SwerveModule {
             mDriveMotor.set(percentOutput);
         }
         else {
-            double velocity = Conversions.getInputShaftRotations((desiredState.speedMetersPerSecond / DrivetrainConstants.WHEEL_CIRCUMFERENCE), DrivetrainConstants.GEAR_RATIO);
+            double velocity = Conversions.getInputShaftRotations((desiredState.speedMetersPerSecond / DrivetrainConstants.WHEEL_CIRCUMFERENCE), DrivetrainConstants.DRIVE_RATIO);
             mDriveMotor.getPIDController().setReference(velocity, ControlType.kVelocity);
         }
     }
 
     private void setAngle(SwerveModuleState desiredState){
         Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (DrivetrainConstants.MAX_SPEED * 0.01)) ? lastAngle : desiredState.angle; //Prevent rotating module if speed is less then 1%. Prevents Jittering.
-        mAngleMotor.getPIDController().setReference((angle.getRotations()), ControlType.kPosition);
+        mAngleMotor.getPIDController().setReference(Conversions.getInputShaftRotations(angle.getRotations(), DrivetrainConstants.ANGLE_RATIO), ControlType.kPosition);
 
         lastAngle = angle;
     }
 
-    private Rotation2d getAngle(){
-        return Rotation2d.fromRotations(mAngleMotor.getEncoder().getPosition() / DrivetrainConstants.ANGLE_RATIO);
+    public Rotation2d getAngle(){
+        return Rotation2d.fromRotations(MathUtil.inputModulus(Conversions.getOutputShaftRotations(mAngleMotor.getEncoder().getPosition(), DrivetrainConstants.ANGLE_RATIO), 0, 1));
     }
 
-    public Rotation2d getCanCoder(){
-        return Rotation2d.fromRotations((angleEncoder.getAbsolutePosition()));//= - angleOffset.getRotations()));
+    public Rotation2d getAbsPos(){
+        return Rotation2d.fromRotations((MathUtil.inputModulus(angleEncoder.getAbsolutePosition(), 0, 1)));
     }
 
-    public double getCanCoderRaw(){
-        return angleEncoder.getAbsolutePosition();// - angleOffset.getRotations();
+    public double getAbsRaw(){
+        return angleEncoder.getAbsolutePosition();
     }
 
     public double getAngleRaw(){
@@ -96,8 +95,8 @@ public class SwerveModule {
     }
 
     public void resetToAbsolute(){
-        double absolutePosition = getCanCoder().getRotations() * DrivetrainConstants.ANGLE_RATIO;
-        mAngleMotor.getEncoder().setPosition(absolutePosition);
+        double absolutePosition = getAbsPos().getRotations();
+        mAngleMotor.getEncoder().setPosition(Conversions.getInputShaftRotations(absolutePosition, DrivetrainConstants.ANGLE_RATIO));
     }
 
     private void configAngleEncoder(){
@@ -106,14 +105,14 @@ public class SwerveModule {
 
     public SwerveModuleState getState(){
         return new SwerveModuleState(
-            Conversions.getOutputShaftRotations(mDriveMotor.getEncoder().getVelocity(), DrivetrainConstants.GEAR_RATIO) * DrivetrainConstants.WHEEL_CIRCUMFERENCE,
+            Conversions.getOutputShaftRotations(mDriveMotor.getEncoder().getVelocity(), DrivetrainConstants.DRIVE_RATIO) * DrivetrainConstants.WHEEL_CIRCUMFERENCE,
             getAngle()
         ); 
     }
 
     public SwerveModulePosition getPosition(){
         return new SwerveModulePosition(
-            Conversions.getOutputShaftRotations(mDriveMotor.getEncoder().getPosition(), DrivetrainConstants.GEAR_RATIO) * DrivetrainConstants.WHEEL_CIRCUMFERENCE,
+            Conversions.getOutputShaftRotations(mDriveMotor.getEncoder().getPosition(), DrivetrainConstants.DRIVE_RATIO) * DrivetrainConstants.WHEEL_CIRCUMFERENCE,
             getAngle()
         );
     }
