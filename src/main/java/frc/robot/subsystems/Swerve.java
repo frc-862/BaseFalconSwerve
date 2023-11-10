@@ -92,8 +92,8 @@ public class Swerve extends SubsystemBase {
         // resetModulesToAbsolute();
 
         this.limelights = new Limelight[] {
-            new Limelight("limelight", "10.8.62.11"),
-            new Limelight("limelight-2", "10.8.62.12")
+            new Limelight("limelight-back", "10.8.62.11"),
+            new Limelight("limelight-front", "10.8.62.12")
         };
         // limelight.setCameraPoseRobotSpace(new Pose3d(Units.inchesToMeters(3.375), 0, Units.inchesToMeters(21.6), new Rotation3d(0, 0, 0)));
         this.poseEstimator = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), limelights[0].getAlliancePose().toPose2d());
@@ -185,16 +185,12 @@ public class Swerve extends SubsystemBase {
     public void periodic(){
         poseEstimator.updateWithTime(Timer.getFPGATimestamp(), getYaw(), getModulePositions());
         swerveodo.updateWithTime(Timer.getFPGATimestamp(), getYaw(), getModulePositions());
-        for (Limelight limelight : limelights) {
-            if (limelight.trustPose()) {
-                Pose4d pose = limelight.getAlliancePose();
-                poseEstimator.addVisionMeasurement(pose.toPose2d(), Timer.getFPGATimestamp() - Units.millisecondsToSeconds(pose.getLatency()) - VisionConstants.PROCESS_LATENCY);
-                visionField.setRobotPose(pose.getX(), pose.getY(), pose.getRotation().toRotation2d());
-            }
-
-            //Only update shuffleboard every other run
-            field.setRobotPose(getPose());
+        for (Limelight limelight : Limelight.filterLimelights(limelights)) {
+            Pose4d pose = limelight.getAlliancePose();
+            poseEstimator.addVisionMeasurement(pose.toPose2d(), Timer.getFPGATimestamp() - Units.millisecondsToSeconds(pose.getLatency()) - VisionConstants.PROCESS_LATENCY);
+            visionField.setRobotPose(pose.getX(), pose.getY(), pose.getRotation().toRotation2d());
         }
+        field.setRobotPose(getPose());
         odoField.setRobotPose(swerveodo.getEstimatedPosition());
 
         LightningShuffleboard.set("Odometry", "Pose Estimator Field", field);
