@@ -101,9 +101,11 @@ public final class Constants {
     }
 
     public static final class VisionConstants {
-        //This is a magic number from gridlock, may need to be changed or removed entirely
+        //This is a magic number from gridlock, may need to be changed or removed 
+        // TODO FIND
         public static final double PROCESS_LATENCY = 0.0472;
         public static final Translation2d FIELD_LIMIT = new Translation2d(Units.feetToMeters(54.0), Units.feetToMeters(26.0));
+        
     }
 
     // RobotMap Constants
