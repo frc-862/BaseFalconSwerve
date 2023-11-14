@@ -13,8 +13,12 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.controls.TorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
+import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.CANcoder;
 
 import frc.robot.Constants.DrivetrainConstants.DriveGains;
@@ -69,7 +73,8 @@ public class SwerveModule {
         }
         else {
             double velocity = Conversions.getInputShaftRotations((desiredState.speedMetersPerSecond / DrivetrainConstants.WHEEL_CIRCUMFERENCE), DrivetrainConstants.GEAR_RATIO);
-            mDriveMotor.setControl(new VelocityDutyCycle(velocity, true, feedforward.calculate(desiredState.speedMetersPerSecond), 0, false));
+            // mDriveMotor.setControl(new VelocityDutyCycle(velocity, true, feedforward.calculate(desiredState.speedMetersPerSecond), 0, false));
+            mDriveMotor.setControl(new VelocityTorqueCurrentFOC(velocity, feedforward.calculate(desiredState.speedMetersPerSecond), 0, false));
         }
     }
 
@@ -79,6 +84,7 @@ public class SwerveModule {
         // mAngleMotor.setControl(new PositionDutyCycle((angle.getDegrees() / 360) * DrivetrainConstants.ANGLE_RATIO));
         // mAngleMotor.setControl(new PositionDutyCycle((0)));
         mAngleMotor.setControl(new PositionDutyCycle(angle.getRotations()));
+        // mAngleMotor.setControl(new MotionMagicDutyCycle(angle.getRotations(), true, 0, 0, false));
 
 
         lastAngle = angle;

@@ -63,6 +63,9 @@ public final class CTREConfigs {
         swerveDriveFXConfig.ClosedLoopRamps.TorqueClosedLoopRampPeriod = DrivetrainConstants.DRIVE_CLOSED_RAMP_RATE;
         swerveDriveFXConfig.ClosedLoopRamps.VoltageClosedLoopRampPeriod = DrivetrainConstants.DRIVE_CLOSED_RAMP_RATE;
         
+        swerveDriveFXConfig.TorqueCurrent.PeakForwardTorqueCurrent = 800d;
+        swerveDriveFXConfig.TorqueCurrent.PeakReverseTorqueCurrent = 800d;
+        swerveDriveFXConfig.TorqueCurrent.TorqueNeutralDeadband = 1d;
 
         /* Swerve CANCoder Configuration */
         swerveCanCoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;

@@ -29,6 +29,9 @@ public final class Constants {
 
     public static final class DrivetrainConstants {
 
+        //Current limits
+        public static final double MAX_DRIVE_CURRENT = 60d;
+
         // Our drivetrain track width and Wheelbase
         public static final double DRIVETRAIN_TRACKWIDTH_METERS = Units.inchesToMeters(22.5);
         public static final double DRIVETRAIN_WHEELBASE_METERS =  Units.inchesToMeters(22.5);
