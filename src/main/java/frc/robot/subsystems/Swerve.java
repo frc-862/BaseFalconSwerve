@@ -30,14 +30,13 @@ public class Swerve extends SubsystemBase {
     public SwerveModule[] mSwerveMods;
     public SwerveDrivePoseEstimator poseEstimator;
     public SwerveDrivePoseEstimator swerveodo;
-    private Pose4d pose;
     private Field2d field = new Field2d();
     private Field2d visionField = new Field2d();
     private Field2d odoField = new Field2d();
 
     public Pigeon2 gyro;
 
-    private Limelight limelight;
+    private Limelight[] limelights;
 
     public Swerve() {
         gyro = new Pigeon2(RobotMap.CAN.PIGEON, RobotMap.BUS.PIGEON);
@@ -92,12 +91,15 @@ public class Swerve extends SubsystemBase {
         Timer.delay(1.0);
         // resetModulesToAbsolute();
 
-        this.limelight = new Limelight("limelight");
+        this.limelights = new Limelight[] {
+            new Limelight("limelight-back", "10.8.62.11"),
+            new Limelight("limelight-front", "10.8.62.12")
+        };
         // limelight.setCameraPoseRobotSpace(new Pose3d(Units.inchesToMeters(3.375), 0, Units.inchesToMeters(21.6), new Rotation3d(0, 0, 0)));
-        this.poseEstimator = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), limelight.getAlliancePose().toPose2d());
+        this.poseEstimator = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), limelights[0].getAlliancePose().toPose2d());
         this.poseEstimator.update(getYaw(), getModulePositions());
         this.swerveodo = new SwerveDrivePoseEstimator(DrivetrainConstants.SWERVE_KINEMATICS, getYaw(), getModulePositions(), new Pose2d());
-        swerveodo.resetPosition(getYaw(), getModulePositions(), limelight.getAlliancePose().toPose2d());
+        swerveodo.resetPosition(getYaw(), getModulePositions(), limelights[0].getAlliancePose().toPose2d());
     }
 
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
@@ -171,13 +173,6 @@ public class Swerve extends SubsystemBase {
     }
 
     /**
-     * @return true if we trust the vision data, false if we don't
-     */
-    public boolean trustVision() {
-        return (pose != null) && (limelight.hasTarget());
-    }
-
-    /**
      * Gets the kinematics of the robot.
      * 
      * @return the kinematics of the robot
@@ -190,16 +185,12 @@ public class Swerve extends SubsystemBase {
     public void periodic(){
         poseEstimator.updateWithTime(Timer.getFPGATimestamp(), getYaw(), getModulePositions());
         swerveodo.updateWithTime(Timer.getFPGATimestamp(), getYaw(), getModulePositions());
-        if (trustVision()) {
+        for (Limelight limelight : Limelight.filterLimelights(limelights)) {
+            Pose4d pose = limelight.getAlliancePose();
             poseEstimator.addVisionMeasurement(pose.toPose2d(), Timer.getFPGATimestamp() - Units.millisecondsToSeconds(pose.getLatency()) - VisionConstants.PROCESS_LATENCY);
-            pose = limelight.getAlliancePose();
-        }
-
-        //Only update shuffleboard every other run
-        field.setRobotPose(getPose());
-        if (trustVision()) {
             visionField.setRobotPose(pose.getX(), pose.getY(), pose.getRotation().toRotation2d());
         }
+        field.setRobotPose(getPose());
         odoField.setRobotPose(swerveodo.getEstimatedPosition());
 
         LightningShuffleboard.set("Odometry", "Pose Estimator Field", field);
