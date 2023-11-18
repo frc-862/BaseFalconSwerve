@@ -81,7 +81,7 @@ public final class Constants {
 
         // Gains vaules for PIDControllers
         public static final class DriveGains {
-            public static final double kP = 0.17047;// .116d;
+            public static final double kP = 0.0021574;// .116d;
             public static final double kI = 0.0d;
             public static final double kD = 0.0d;
 
@@ -145,7 +145,7 @@ public final class Constants {
     }
 
     public static final class AutonomousConstants {
-        public static final PIDConstants DRIVE_PID_CONSTANTS = new PIDConstants(0.01, 0, 0); // Drive velocity PID 2.5
+        public static final PIDConstants DRIVE_PID_CONSTANTS = new PIDConstants(0.009, 0, 0); // Drive velocity PID 2.5
         public static final PIDConstants THETA_PID_CONSTANTS = new PIDConstants(0.01, 0, 0); // Rotation PID 1
         public static final PIDConstants POSE_PID_CONSTANTS = new PIDConstants(0, 0, 0); // X and Y position PID
 

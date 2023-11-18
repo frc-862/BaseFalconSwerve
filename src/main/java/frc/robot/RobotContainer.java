@@ -1,6 +1,8 @@
 package frc.robot;
 
 import java.util.HashMap;
+
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.XboxController;
@@ -24,13 +26,15 @@ public class RobotContainer extends LightningContainer {
 
     private static final XboxController driver = new XboxController(ControllerConstants.DRIVER_CONTROLLER_PORT);
 
-     private static final AutonomousCommandFactory autoFactory = new AutonomousCommandFactory(drivetrain::getPoseNoVision, drivetrain::resetOdometry, drivetrain.getDriveKinematics(),
+     private static final AutonomousCommandFactory autoFactory = new AutonomousCommandFactory(drivetrain::getPose, drivetrain::resetOdometry, drivetrain.getDriveKinematics(),
             AutonomousConstants.DRIVE_PID_CONSTANTS, AutonomousConstants.THETA_PID_CONSTANTS, AutonomousConstants.POSE_PID_CONSTANTS, drivetrain::setModuleStates, drivetrain);
 
     @Override
     protected void configureButtonBindings() {
         // new Trigger(driver::getAButton).onTrue(new InstantCommand(drivetrain::resetModulesToAbsolute));
         new Trigger(driver::getXButton).whileTrue(new InstantCommand(drivetrain::park, drivetrain));
+        new Trigger(driver::getYButton).whileTrue(new InstantCommand(() -> drivetrain.resetOdometry(new Pose2d()), drivetrain));
+
     }
 
     @Override
