@@ -6,8 +6,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.AnalogEncoder;
-import edu.wpi.first.wpilibj.CAN;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.thunder.math.Conversions;
 import frc.thunder.swerve.CTREModuleState;
 import frc.thunder.swerve.SwerveModuleConstants;
@@ -15,8 +13,6 @@ import frc.thunder.swerve.SwerveModuleConstants;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.hardware.CANcoder;
 
 import frc.robot.Constants.DrivetrainConstants.DriveGains;
 import frc.robot.Constants.DrivetrainConstants;

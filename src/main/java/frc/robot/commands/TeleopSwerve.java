@@ -31,7 +31,7 @@ public class TeleopSwerve extends CommandBase {
 
     @Override
     public void execute() {
-        final double speedCap = 0.3; //TODO: remove
+        final double speedCap = 0.7; //TODO: remove
 
         /* Get Values, Deadband*/
         double translationVal = MathUtil.applyDeadband(translationSup.getAsDouble(), ControllerConstants.DEADBAND) * speedCap;
