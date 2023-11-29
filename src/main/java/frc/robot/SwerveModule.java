@@ -169,9 +169,9 @@ public class SwerveModule {
     // }
 
     public SwerveModulePosition getPosition(){
-            // Refresh drive signals only, azimuth signals get refreshed in getAngle()
-            drivePosition.refresh();
-            driveVelocity.refresh();
+        // Refresh drive signals only, azimuth signals get refreshed in getAngle()
+        drivePosition.refresh();
+        driveVelocity.refresh();
 
         double drive_rots = BaseStatusSignal.getLatencyCompensatedValue(drivePosition, driveVelocity);
 
