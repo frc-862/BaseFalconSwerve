@@ -148,13 +148,14 @@ public class Swerve extends SubsystemBase {
         poseEstimator.resetPosition(getYaw(), getModulePositions(), pose);
     }
 
-    public SwerveModuleState[] getModuleStates(){
-        SwerveModuleState[] states = new SwerveModuleState[4];
-        for(SwerveModule mod : mSwerveMods){
-            states[mod.moduleNumber] = mod.getState();
-        }
-        return states;
-    }
+    //TODO: IDK what I'm doing
+    // public SwerveModuleState[] getModuleStates(){
+    //     SwerveModuleState[] states = new SwerveModuleState[4];
+    //     for(SwerveModule mod : mSwerveMods){
+    //         states[mod.moduleNumber] = mod.getState();
+    //     }
+    //     return states;
+    // }
 
     public SwerveModulePosition[] getModulePositions(){
         SwerveModulePosition[] positions = new SwerveModulePosition[4];

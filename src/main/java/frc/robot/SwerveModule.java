@@ -4,12 +4,14 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.thunder.math.Conversions;
 import frc.thunder.swerve.CTREModuleState;
 import frc.thunder.swerve.SwerveModuleConstants;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
@@ -29,6 +31,12 @@ public class SwerveModule {
     private TalonFX mDriveMotor;
     private CANcoder angleEncoder;
 
+    private StatusSignal<Double> anglePosition;
+    private StatusSignal<Double> angleVelocity;
+    private StatusSignal<Double> angleAbsolutePosition;
+    private StatusSignal<Double> drivePosition;
+    private StatusSignal<Double> driveVelocity;
+
     SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(DriveGains.kS, DriveGains.kV, DriveGains.kA);
 
     public SwerveModule(int moduleNumber, SwerveModuleConstants moduleConstants){
@@ -47,7 +55,7 @@ public class SwerveModule {
         mDriveMotor = new TalonFX(moduleConstants.driveMotorID, moduleConstants.driveMotorBus);
         configDriveMotor();
 
-        lastAngle = getState().angle;
+        lastAngle = getPosition().angle;
 
         // mAngleMotor.setRotorPosition(0);
         angleEncoder.setPosition(getCanCoderRaw());
@@ -85,19 +93,29 @@ public class SwerveModule {
     }
 
     private Rotation2d getAngle(){
-        return Rotation2d.fromRotations(mAngleMotor.getRotorPosition().getValue() / DrivetrainConstants.ANGLE_RATIO);
+        /* Refresh all signals */
+        anglePosition.refresh();
+        angleVelocity.refresh();
+
+        /* Now latency-compensate our signals */
+        double angle_rot = BaseStatusSignal.getLatencyCompensatedValue(anglePosition, angleVelocity);
+
+        return Rotation2d.fromRotations(angle_rot / DrivetrainConstants.ANGLE_RATIO);
     }
 
     public Rotation2d getCanCoder(){
-        return Rotation2d.fromRotations((angleEncoder.getAbsolutePosition().getValue()));//= - angleOffset.getRotations()));
+        angleAbsolutePosition.refresh();
+        return Rotation2d.fromRotations((angleAbsolutePosition.getValue()));//= - angleOffset.getRotations()));
     }
 
     public double getCanCoderRaw(){
-        return angleEncoder.getAbsolutePosition().getValue();// - angleOffset.getRotations();
+        angleAbsolutePosition.refresh();
+        return angleAbsolutePosition.getValue();// - angleOffset.getRotations();
     }
 
     public double getAngleRaw(){
-        return mAngleMotor.getRotorPosition().getValue();
+        anglePosition.refresh();
+        return anglePosition.getValue();
     }
 
     public void resetToAbsolute(){
@@ -110,6 +128,8 @@ public class SwerveModule {
         CANcoderConfiguration config = new CTREConfigs().swerveCanCoderConfig;
         config.MagnetSensor.MagnetOffset = -angleOffset.getRotations();
         angleEncoder.getConfigurator().apply(config);
+        this.angleAbsolutePosition = angleEncoder.getAbsolutePosition();
+        this.angleAbsolutePosition.setUpdateFrequency(250);
     }
 
     private void configAngleMotor(){
@@ -117,25 +137,47 @@ public class SwerveModule {
         TalonFXConfiguration config = new CTREConfigs().swerveAngleFXConfig;
         config.Feedback.FeedbackRemoteSensorID = angleEncoder.getDeviceID();
         mAngleMotor.getConfigurator().apply(config);
+        this.anglePosition = mAngleMotor.getRotorPosition(); //TODO: verify whether we should be sourcing angle data from the motor or the cancoder (might not matter)
+        this.angleVelocity = mAngleMotor.getRotorVelocity();
+        this.anglePosition.setUpdateFrequency(250);
+        this.angleVelocity.setUpdateFrequency(250);
         resetToAbsolute();
     }
 
     private void configDriveMotor(){        
         mDriveMotor.getConfigurator().apply(new TalonFXConfiguration());
         mDriveMotor.getConfigurator().apply(new CTREConfigs().swerveDriveFXConfig);
+        this.drivePosition = mDriveMotor.getRotorPosition();
+        this.driveVelocity = mDriveMotor.getRotorVelocity();
+        this.drivePosition.setUpdateFrequency(250);
+        this.driveVelocity.setUpdateFrequency(250);
         mDriveMotor.setRotorPosition(0);
     }
 
-    public SwerveModuleState getState(){
-        return new SwerveModuleState(
-            Conversions.getOutputShaftRotations(mDriveMotor.getRotorVelocity().getValue(), DrivetrainConstants.GEAR_RATIO) * DrivetrainConstants.WHEEL_CIRCUMFERENCE,
-            getAngle()
-        ); 
-    }
+    //TODO: I think this whole function is redundant, we can just use getPosition() instead :upside_down:
+    // public SwerveModuleState getState(){
+
+    //     drivePosition.refresh();
+    //     driveVelocity.refresh();
+
+    //     //TODO: can we latency compensate the velocity? (need slope of velocity signal to do this)
+
+    //     return new SwerveModuleState(
+    //         Conversions.getOutputShaftRotations(driveVelocity.getValue(), DrivetrainConstants.GEAR_RATIO) * DrivetrainConstants.WHEEL_CIRCUMFERENCE,
+    //         getAngle()
+    //     ); 
+    // }
 
     public SwerveModulePosition getPosition(){
+            // Refresh drive signals only, azimuth signals get refreshed in getAngle()
+            drivePosition.refresh();
+            driveVelocity.refresh();
+
+        double drive_rots = BaseStatusSignal.getLatencyCompensatedValue(drivePosition, driveVelocity);
+
+
         return new SwerveModulePosition(
-            Conversions.getOutputShaftRotations(mDriveMotor.getRotorPosition().getValue(), DrivetrainConstants.GEAR_RATIO) * DrivetrainConstants.WHEEL_CIRCUMFERENCE,
+            Conversions.getOutputShaftRotations(drive_rots, DrivetrainConstants.GEAR_RATIO) * DrivetrainConstants.WHEEL_CIRCUMFERENCE,
             getAngle()
         );
     }
