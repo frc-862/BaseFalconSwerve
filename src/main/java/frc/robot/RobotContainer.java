@@ -13,9 +13,9 @@ import frc.thunder.LightningContainer;
 import frc.thunder.auto.AutonomousCommandFactory;
 
 public class RobotContainer extends LightningContainer {
-    private static final Swerve drivetrain = new Swerve();
+    // private static final Swerve drivetrain = new Swerve();
 //     private static final LimelightSubsystem limelight = new LimelightSubsystem();
-        // private static final TestMotor testMotor = new TestMotor();
+        private static final TestMotor testMotor = new TestMotor();
         
     private static final XboxController driver =
             new XboxController(ControllerConstants.DRIVER_CONTROLLER_PORT);
@@ -35,10 +35,10 @@ public class RobotContainer extends LightningContainer {
 
     @Override
     protected void configureDefaultCommands() {
-        drivetrain.setDefaultCommand(
-                new TeleopSwerve(drivetrain, () -> driver.getLeftY(), () -> driver.getLeftX(),
-                        () -> driver.getRightX(), () -> (driver.getRightTriggerAxis() > 0.75)));
-        // testMotor.setDefaultCommand(new motorTest(() -> driver.getRightY(), testMotor));
+        // drivetrain.setDefaultCommand(
+        //         new TeleopSwerve(drivetrain, () -> driver.getLeftY(), () -> driver.getLeftX(),
+        //                 () -> driver.getRightX(), () -> (driver.getRightTriggerAxis() > 0.75)));
+        testMotor.setDefaultCommand(new motorTest(() -> driver.getRightY(), testMotor));
     }
 
     @Override
